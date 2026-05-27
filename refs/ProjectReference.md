@@ -10,12 +10,12 @@ A **frontend-only Progressive Web App (PWA)** installable on a smartphone. No ba
 
 ### Core Pages / Views
 
-| Route | View | Access |
-|---|---|---|
-| `/` | `MainView` | Default on open |
-| `/stats` | `StatsView` | Touch gesture from Main, or back-button from Stats |
-| `/fitness` | `FitnessView` | Button top-right on Main |
-| `/settings` | `SettingsView` | Button on Main or Fitness |
+| Route       | View           | Access                                             |
+| ----------- | -------------- | -------------------------------------------------- |
+| `/`         | `MainView`     | Default on open                                    |
+| `/stats`    | `StatsView`    | Touch gesture from Main, or back-button from Stats |
+| `/fitness`  | `FitnessView`  | Button top-right on Main                           |
+| `/settings` | `SettingsView` | Button on Main or Fitness                          |
 
 ---
 
@@ -44,12 +44,12 @@ All data is persisted to `localStorage` via Pinia stores using `@vueuse/core`'s 
 
 ```ts
 interface Machine {
-  id: string;           // uuid
-  name: string;         // e.g. "Chest Press"
-  locationX: number;    // 0.0–1.0, relative position on gym floor card
-  locationY: number;    // 0.0–1.0
-  currentWeight: number; // kg
-  stepSize: number;     // kg to add when "weight up" action is triggered
+  id: string // uuid
+  name: string // e.g. "Chest Press"
+  locationX: number // 0.0–1.0, relative position on gym floor card
+  locationY: number // 0.0–1.0
+  currentWeight: number // kg
+  stepSize: number // kg to add when "weight up" action is triggered
 }
 ```
 
@@ -57,15 +57,15 @@ interface Machine {
 
 ```ts
 interface MachineEntry {
-  machineId: string;    // FK to Machine
-  weight: number;       // kg — the weight as performed (snapshot at time of logging)
-  weightIncreased: boolean; // true if "Weight Up + Done" was used
+  machineId: string // FK to Machine
+  weight: number // kg — the weight as performed (snapshot at time of logging)
+  weightIncreased: boolean // true if "Weight Up + Done" was used
 }
 
 interface Session {
-  id: string;           // uuid
-  date: string;         // ISO date string "YYYY-MM-DD"
-  machinesDone: MachineEntry[];
+  id: string // uuid
+  date: string // ISO date string "YYYY-MM-DD"
+  machinesDone: MachineEntry[]
 }
 ```
 
@@ -77,10 +77,10 @@ A session counts as valid (for streak/stats) if `machinesDone.length >= 1`.
 
 ```ts
 interface FitnessCheck {
-  id: string;
-  name: string;          // e.g. "Push Ups", "Stretching Reach"
-  unit: string;          // e.g. "reps", "cm"
-  stepSize: number;      // picker increment, e.g. 1 for push ups, 0.1 for cm
+  id: string
+  name: string // e.g. "Push Ups", "Stretching Reach"
+  unit: string // e.g. "reps", "cm"
+  stepSize: number // picker increment, e.g. 1 for push ups, 0.1 for cm
 }
 ```
 
@@ -88,10 +88,10 @@ interface FitnessCheck {
 
 ```ts
 interface FitnessMeasurement {
-  id: string;
-  checkId: string;       // FK to FitnessCheck
-  date: string;          // ISO date string
-  value: number;
+  id: string
+  checkId: string // FK to FitnessCheck
+  date: string // ISO date string
+  value: number
 }
 ```
 
@@ -99,8 +99,8 @@ interface FitnessMeasurement {
 
 ```ts
 interface UIState {
-  dailyPaletteIndex: number; // 0–N, picked once per calendar day
-  dailyPaletteDate: string;  // "YYYY-MM-DD", used to detect day change
+  dailyPaletteIndex: number // 0–N, picked once per calendar day
+  dailyPaletteDate: string // "YYYY-MM-DD", used to detect day change
 }
 ```
 
@@ -111,25 +111,27 @@ interface UIState {
 A named list of **8 palettes**. Each palette has 3 wave colors (wave1, wave2, wave3 — from back to front/bottom) and an `accent` color. Picked randomly once per calendar day, stored in `uiStore`. If `dailyPaletteDate !== today`, re-pick.
 
 **`accent` is used for:**
+
 - The location pulse/ripple circles on machine cards
 - The "Weight Up + Done" center button
 - Chart lines and heatmap cell fill
 
 **Button colors (fixed, not palette-driven):**
+
 - Later button: grey (`#9ca3af` or Tailwind `gray-400`)
 - Done button: near-black (`#1a1a1a` or Tailwind `gray-900`)
 - Machine cards themselves are always white (`#ffffff`)
 
 ```js
 export const PALETTES = [
-  { name: "Ocean",    wave1: "#0077b6", wave2: "#0096c7", wave3: "#48cae4", accent: "#ade8f4" },
-  { name: "Sunset",   wave1: "#e76f51", wave2: "#f4a261", wave3: "#e9c46a", accent: "#ffd6a5" },
-  { name: "Forest",   wave1: "#1b4332", wave2: "#2d6a4f", wave3: "#52b788", accent: "#b7e4c7" },
-  { name: "Lavender", wave1: "#6a0572", wave2: "#9d4edd", wave3: "#c77dff", accent: "#e0aaff" },
-  { name: "Rose",     wave1: "#c9184a", wave2: "#ff4d6d", wave3: "#ff8fa3", accent: "#ffb3c1" },
-  { name: "Slate",    wave1: "#023e8a", wave2: "#0077b6", wave3: "#90e0ef", accent: "#caf0f8" },
-  { name: "Ember",    wave1: "#7f4f24", wave2: "#b5451b", wave3: "#e2711d", accent: "#ffca3a" },
-  { name: "Mint",     wave1: "#006466", wave2: "#0b525b", wave3: "#144552", accent: "#99d8c0" },
+  { name: 'Ocean', wave1: '#0077b6', wave2: '#0096c7', wave3: '#48cae4', accent: '#ade8f4' },
+  { name: 'Sunset', wave1: '#e76f51', wave2: '#f4a261', wave3: '#e9c46a', accent: '#ffd6a5' },
+  { name: 'Forest', wave1: '#1b4332', wave2: '#2d6a4f', wave3: '#52b788', accent: '#b7e4c7' },
+  { name: 'Lavender', wave1: '#6a0572', wave2: '#9d4edd', wave3: '#c77dff', accent: '#e0aaff' },
+  { name: 'Rose', wave1: '#c9184a', wave2: '#ff4d6d', wave3: '#ff8fa3', accent: '#ffb3c1' },
+  { name: 'Slate', wave1: '#023e8a', wave2: '#0077b6', wave3: '#90e0ef', accent: '#caf0f8' },
+  { name: 'Ember', wave1: '#7f4f24', wave2: '#b5451b', wave3: '#e2711d', accent: '#ffca3a' },
+  { name: 'Mint', wave1: '#006466', wave2: '#0b525b', wave3: '#144552', accent: '#99d8c0' },
 ]
 ```
 
@@ -142,6 +144,7 @@ export const PALETTES = [
 **Background:** `#faf9f7` (set as PWA `background_color` and `theme_color` in manifest too).
 
 **Layout:**
+
 - Top bar (fixed, z above waves):
   - Top-left: Progress counter `"X / Y"` (machines done today / total machines)
   - Top-right: Two icon buttons — **Fitness** (e.g. activity/heart icon) and **Settings** (gear icon)
@@ -150,6 +153,7 @@ export const PALETTES = [
 - Bottom 25% touch zone: invisible overlay that, when touched/tapped, triggers navigation to `/stats` (slide-up transition)
 
 **Page transitions:**
+
 - To `/stats`: Main page slides **up**, Stats slides in from **bottom**
 - To `/fitness`: Main page slides **down**, Fitness slides in from **top**
 - To `/settings`: Standard slide-in from right
@@ -174,6 +178,7 @@ export const PALETTES = [
 A square card. Width and height = 80vw (capped at ~360px on larger screens).
 
 **Card contents:**
+
 - **Top-left:** Machine name, bold, large
 - **Top-right:** Small "skip for today" icon button (e.g. ✕ or eye-slash). Skipping removes the card from today's stack without counting as done.
 - **Center background:** Location pulse — an SVG with 3–4 concentric expanding circles (CSS `@keyframes` opacity + scale) anchored at `(locationX * 100%, locationY * 100%)` within the card. Circles are colored with the palette's `accent` color, low opacity (~15–25%), so they don't obscure content.
@@ -248,6 +253,7 @@ A square card. Width and height = 80vw (capped at ~360px on larger screens).
 2. **Fitness check cards** — one per `FitnessCheck`, stacked vertically, scrollable:
 
 Each card layout:
+
 - **Top-left:** Check name (e.g. "Push Ups")
 - **Top-right:** Confirm/save button (checkmark icon) — saves today's value from the picker
 - **Left ~80% of card body:** Line chart (Chart.js) showing last 20 measurements. All data points use the palette `wave2` color. Today's pending measurement point is shown in light grey at the right edge of the chart (at the current picker value, updating live as the wheel is turned).
@@ -268,6 +274,7 @@ Each card layout:
 List of all machines. Each row shows name + current weight. Tap to expand/edit inline or open an edit modal. "Add Machine" button at the bottom of the list.
 
 **Fields per machine:**
+
 - Name (text input)
 - Current Weight (number input, kg)
 - Step Size (number input, kg)
@@ -280,6 +287,7 @@ List of all machines. Each row shows name + current weight. Tap to expand/edit i
 Same pattern as machines. "Add Fitness Check" button at the bottom.
 
 **Fields per check:**
+
 - Name (text input)
 - Unit (text input, e.g. "reps", "cm")
 - Step Size (number input)
@@ -296,14 +304,14 @@ Same pattern as machines. "Add Fitness Check" button at the bottom.
 
 All transitions use Vue's `<Transition>` component with CSS classes.
 
-| Transition | Effect |
-|---|---|
-| Main → Stats | Main slides up (`translateY(-100%)`), Stats enters from bottom (`translateY(100%)` → 0) |
-| Stats → Main | Stats slides down, Main comes back from top |
-| Main → Fitness | Main slides down, Fitness enters from top |
-| Fitness → Main | Fitness slides up, Main comes back from bottom |
-| Any → Settings | Settings slides in from right |
-| Settings → Any | Settings slides out to right |
+| Transition     | Effect                                                                                  |
+| -------------- | --------------------------------------------------------------------------------------- |
+| Main → Stats   | Main slides up (`translateY(-100%)`), Stats enters from bottom (`translateY(100%)` → 0) |
+| Stats → Main   | Stats slides down, Main comes back from top                                             |
+| Main → Fitness | Main slides down, Fitness enters from top                                               |
+| Fitness → Main | Fitness slides up, Main comes back from bottom                                          |
+| Any → Settings | Settings slides in from right                                                           |
+| Settings → Any | Settings slides out to right                                                            |
 
 **Main → Stats trigger:** An invisible touch zone covering the **bottom 25%** of MainView. On `touchstart`/`touchend` in this zone (not a swipe, just a tap/touch), navigate to `/stats`. To avoid conflicts with card swipe gestures, only activate this zone when the `CardStack` is **not** in an active swipe state (use a shared `isSwiping` ref from the card stack).
 
@@ -392,12 +400,14 @@ gymdeck/
 On first launch (empty localStorage), seed the stores with:
 
 **Machines (examples — user can replace):**
+
 - Chest Press, weight: 40kg, step: 2.5kg, location: (0.3, 0.4)
 - Lat Pulldown, weight: 35kg, step: 2.5kg, location: (0.7, 0.3)
 - Leg Press, weight: 80kg, step: 5kg, location: (0.5, 0.8)
 - Shoulder Press, weight: 25kg, step: 2.5kg, location: (0.2, 0.6)
 
 **Fitness Checks (examples):**
+
 - Push Ups, unit: "reps", step: 1
 - Stretching Reach, unit: "cm", step: 0.5
 
@@ -414,7 +424,8 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** Running Vite dev server, all stores defined with persistence, seed data loading on first launch.
 
 **Tasks:**
-1. ~~Init + install~~ — done. Scaffold, dependencies, Tailwind, and PWA meta tags are already in place.
+
+1. Init + install: Scaffold, dependencies, Tailwind, and PWA meta tags are already in place.
 2. Configure `vite-plugin-pwa` in `vite.config.ts` with the manifest above
 3. Create all 4 Pinia stores with `useLocalStorage` persistence and TypeScript interfaces matching Section 3
 4. Add seed data logic: on store init, if empty, populate with Section 9 defaults
@@ -432,6 +443,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** A single, fully interactive `MachineCard.vue` that looks correct and responds to all gestures/buttons.
 
 **Tasks:**
+
 1. Build static card layout (80vw square, all sections as per 5.1.2)
 2. Create `LocationPulse.vue` — SVG ripple animation at `(x%, y%)`, integrate into card background
 3. Style with Tailwind + daily palette card color
@@ -453,6 +465,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** Full working main page with stack behavior and animated waves.
 
 **Tasks:**
+
 1. Build `CardStack.vue`:
    - Renders top 3 cards, uses CSS `transform: scale() translateY()` for peeking cards
    - Handles card removal + promote-next animation (spring/ease ~300ms)
@@ -480,6 +493,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** Stats page navigable from Main, all statistics correctly computed.
 
 **Tasks:**
+
 1. Wire Main → Stats transition (slide up/down) via Vue Router + CSS transition classes
 2. Build `StatsView.vue` layout (header, waves-from-top, scrollable content)
 3. Compute and display Quick Stats (streak, total sessions, total weight) — write pure functions in `sessionsStore` getters
@@ -496,6 +510,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** Fitness page navigable from Main, all checks loggable.
 
 **Tasks:**
+
 1. Wire Main → Fitness transition (slide down/up)
 2. Build `DrumRollPicker.vue` — custom scrollable wheel picker:
    - Vertical list of values spaced by `stepSize`
@@ -517,6 +532,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** All data fully editable in-app.
 
 **Tasks:**
+
 1. Wire Any → Settings transition (slide right)
 2. Build `LocationPicker.vue` — small square div, tap to set dot position, emits `{x, y}` as 0–1 fractions
 3. Build `MachineEditor.vue` — form for all machine fields including LocationPicker
@@ -534,6 +550,7 @@ Work through these phases strictly in order. Do not start a new phase until the 
 **Goal:** App feels native-quality on a real phone.
 
 **Tasks:**
+
 1. Audit and fix touch target sizes (minimum 44×44px on all buttons)
 2. Apply `safe-area-inset` padding throughout (notch, home indicator)
 3. Test and fix any swipe vs. scroll conflicts on iOS Safari and Android Chrome
