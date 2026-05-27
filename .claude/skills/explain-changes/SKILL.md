@@ -8,7 +8,7 @@ description: >
   wants to understand what changed and why before committing. Pairs with
   VS Code's Source Control diff viewer: Claude explains the narrative, VS Code
   shows the lines.
-argument-hint: "optional brief description of what was just built (e.g. 'Phase 3 card stack')"
+argument-hint: "phase and part label + brief description (e.g. 'Phase 3 part 2 — card stack')"
 invocation: user
 allowed-tools: Bash(git diff --name-only *), Bash(git diff --stat *), Bash(git diff HEAD *), Bash(git status *), Read, Glob
 ---
@@ -49,7 +49,7 @@ One entry per changed file, in the order from Step 2.
 
 ---
 
-### Walkthrough — [N] files changed
+### $ARGUMENTS — [N] files changed
 
 > Open each file in VS Code's Source Control diff viewer in this order.
 

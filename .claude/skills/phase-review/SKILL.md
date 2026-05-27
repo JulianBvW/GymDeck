@@ -8,7 +8,7 @@ description: >
   even partially — catching problems early is cheaper than fixing them two phases
   later. Also useful after a fix session to verify the fix didn't introduce new
   issues.
-argument-hint: "phase number just completed (e.g. 3)"
+argument-hint: "phase number just completed (e.g. 3). Assumes a git tag `phase-N-done` was created after the previous phase's final commit."
 invocation: user
 allowed-tools: Read, Grep, Glob, Bash(git diff *), Bash(git log *), Bash(find * -name "*.vue"), Bash(find * -name "*.js")
 ---
@@ -23,7 +23,15 @@ Your role here is **reviewer only** — read code, report findings, do not edit 
 
 ## Step 0 — Load context
 
-Read `GymTracker_ProjectReference.md`. Extract the task list and milestone for Phase $ARGUMENTS. Note which phases precede it — you'll do a regression check on those too. Everything scoped to phases *after* $ARGUMENTS is out of scope; don't flag missing features that aren't due yet.
+Read `refs/ProjectReference.md`. Extract the task list and milestone for Phase $ARGUMENTS. Note which phases precede it — you'll do a regression check on those too. Everything scoped to phases *after* $ARGUMENTS is out of scope; don't flag missing features that aren't due yet.
+
+**Determine the diff range.** Each phase ends with a git tag `phase-N-done`. Run:
+```
+git tag
+```
+to confirm the previous phase's tag exists (e.g. `phase-2-done` when reviewing Phase 3). Then use `phase-(N-1)-done..HEAD` as the diff range for all git commands in Steps 1 and 2. If Phase $ARGUMENTS is Phase 1 (no prior tag), use the initial commit: `git log --oneline | tail -1` to get the root SHA and diff from there, or simply diff all tracked files.
+
+Remind yourself: each phase is split into multiple commits. The tag ensures you see the *entire* phase in one diff, not just the last commit.
 
 ---
 
@@ -41,7 +49,12 @@ Then do a **regression pass**: scan key files from phases 1 through $ARGUMENTS�
 
 ## Step 2 — Code quality
 
-Find the `.vue` and `.js` files added or modified in Phase $ARGUMENTS. Use `git diff` if git is available, otherwise `find` for recently changed files.
+Find the `.vue` and `.js` files added or modified in Phase $ARGUMENTS using the tag range established in Step 0:
+```
+git diff --name-only phase-(N-1)-done..HEAD
+git diff phase-(N-1)-done..HEAD
+```
+Fall back to `find` for recently changed files only if git is unavailable.
 
 Look through them for:
 
