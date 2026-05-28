@@ -120,3 +120,5 @@ Verification (end of Part 3)
 - uiStore.dailyPaletteIndex resolves to one of 0–7; dailyPaletteDate equals today's date
 - Re-loading the page preserves store data (localStorage persistence works)
 - Re-running useDailyPalette() on a fresh day re-picks the index (manually test by temporarily setting dailyPaletteDate to yesterday)
+
+Tag after Part 2 commit: git tag phase-1-done
