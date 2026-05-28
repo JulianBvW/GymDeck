@@ -4,6 +4,11 @@ import { defineStore } from 'pinia'
 
 export type TransitionDirection = 'up' | 'down' | 'left' | 'right'
 
+export interface UIState {
+  dailyPaletteIndex: number
+  dailyPaletteDate: string
+}
+
 export const useUIStore = defineStore('ui', () => {
   // Persisted: daily palette selection
   const dailyPaletteIndex = useLocalStorage<number>('gymdeck-palette-index', 0)

@@ -55,7 +55,7 @@ export const useSessionsStore = defineStore('sessions', () => {
     const now = new Date()
     const thisWeek = startOfWeek(toDateString(now))
 
-    let weekCursor = new Date(thisWeek)
+    let weekCursor = new Date(thisWeek + 'T00:00:00')
     while (true) {
       const weekStr = toDateString(weekCursor)
       if (!validDates.has(weekStr)) break
@@ -72,10 +72,11 @@ export const useSessionsStore = defineStore('sessions', () => {
 
   function logEntry(entry: MachineEntry) {
     startSessionIfNeeded()
-    const session = sessions.value.find(s => s.date === today.value)!
-    const existing = session.machinesDone.findIndex(e => e.machineId === entry.machineId)
-    if (existing !== -1) {
-      session.machinesDone[existing] = entry
+    const session = sessions.value.find(s => s.date === today.value)
+    if (!session) return
+    const existing = session.machinesDone.find(e => e.machineId === entry.machineId)
+    if (existing) {
+      Object.assign(existing, entry)
     } else {
       session.machinesDone.push(entry)
     }
