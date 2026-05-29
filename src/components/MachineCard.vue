@@ -7,6 +7,13 @@ defineProps<{
   machine: Machine
   accent: string
 }>()
+
+const emit = defineEmits<{
+  done: []
+  later: []
+  weightUp: []
+  skip: []
+}>()
 </script>
 
 <template>
@@ -30,6 +37,7 @@ defineProps<{
         <button
           class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full"
           aria-label="Skip for today"
+          @click="emit('skip')"
         >
           <X :size="18" />
         </button>
@@ -50,6 +58,7 @@ defineProps<{
           class="w-14 h-14 rounded-full flex items-center justify-center text-white"
           style="background-color: #9ca3af"
           aria-label="Later"
+          @click="emit('later')"
         >
           <Clock :size="22" />
         </button>
@@ -59,6 +68,7 @@ defineProps<{
           class="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-md"
           :style="{ backgroundColor: accent }"
           aria-label="Weight up and done"
+          @click="emit('weightUp')"
         >
           <ArrowUp :size="26" />
         </button>
@@ -68,6 +78,7 @@ defineProps<{
           class="w-14 h-14 rounded-full flex items-center justify-center text-white"
           style="background-color: #1a1a1a"
           aria-label="Done"
+          @click="emit('done')"
         >
           <Check :size="22" />
         </button>
