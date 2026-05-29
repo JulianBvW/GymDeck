@@ -9,7 +9,7 @@ const gradientId = `glow-${props.x}-${props.y}-${props.accent.replace('#', '')}`
 const RING_RADII = [40, 78, 120, 168, 220, 280]
 
 function ringOpacity(i: number): number {
-  return Math.max(0.04, 0.22 - i * 0.032)
+  return Math.max(0.07, 0.38 - i * 0.05)
 }
 </script>
 
@@ -23,8 +23,8 @@ function ringOpacity(i: number): number {
           :cy="`${y * 100}%`"
           r="70%"
         >
-          <stop offset="0%"   :stop-color="accent" stop-opacity="0.32" />
-          <stop offset="35%"  :stop-color="accent" stop-opacity="0.12" />
+          <stop offset="0%"   :stop-color="accent" stop-opacity="0.52" />
+          <stop offset="35%"  :stop-color="accent" stop-opacity="0.22" />
           <stop offset="100%" :stop-color="accent" stop-opacity="0" />
         </radialGradient>
       </defs>
@@ -42,7 +42,7 @@ function ringOpacity(i: number): number {
         fill="none"
         :stroke="accent"
         :stroke-opacity="ringOpacity(i)"
-        stroke-width="1"
+        stroke-width="1.5"
       />
 
       <!-- origin dot -->

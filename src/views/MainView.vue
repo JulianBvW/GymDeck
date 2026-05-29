@@ -11,7 +11,7 @@ const firstMachine = computed(() => machinesStore.machines[0])
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center">
+  <div class="h-full flex items-center justify-center">
     <MachineCard
       v-if="firstMachine"
       :machine="firstMachine"
