@@ -32,6 +32,16 @@ function startOfWeek(dateStr: string): string {
 
 export const useSessionsStore = defineStore('sessions', () => {
   const sessions = useLocalStorage<Session[]>('gymdeck-sessions', [])
+  const machineOrderStorage = useLocalStorage<{ date: string; order: string[] } | null>('gymdeck-machine-order', null)
+
+  const todayMachineOrder = computed<string[] | null>(() => {
+    const stored = machineOrderStorage.value
+    return stored?.date === toDateString(new Date()) ? stored.order : null
+  })
+
+  function saveTodayMachineOrder(order: string[]) {
+    machineOrderStorage.value = { date: toDateString(new Date()), order }
+  }
 
   const today = computed(() => toDateString(new Date()))
 
@@ -82,5 +92,5 @@ export const useSessionsStore = defineStore('sessions', () => {
     }
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, startSessionIfNeeded, logEntry }
+  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, saveTodayMachineOrder, startSessionIfNeeded, logEntry }
 })
