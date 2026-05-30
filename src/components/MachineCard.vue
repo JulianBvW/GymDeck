@@ -79,7 +79,7 @@ function snapBack() {
   dragX.value = 0
   setTimeout(() => {
     isSnapping.value = false
-  }, 380)
+  }, 380) // 80ms buffer past the 300ms spring transition
 }
 
 function onTouchEnd() {
