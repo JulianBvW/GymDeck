@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(npx vue-tsc *)"
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(source ~/.nvm/nvm.sh && ./node_modules/.bin/vue-tsc*)"
     ]
   }
 }

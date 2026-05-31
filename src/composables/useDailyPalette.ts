@@ -19,5 +19,5 @@ export function useDailyPalette() {
     uiStore.dailyPaletteDate = today
   }
 
-  return computed(() => PALETTES[uiStore.dailyPaletteIndex])
+  return computed(() => PALETTES[uiStore.dailyPaletteIndex] ?? PALETTES[0]!)
 }

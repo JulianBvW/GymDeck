@@ -14,6 +14,8 @@ const emit = defineEmits<{
   later: []
   weightUp: []
   skip: []
+  'swipe-start': []
+  'swipe-end': []
 }>()
 
 // --- swipe gesture state ---
@@ -46,6 +48,7 @@ function onTouchStart(e: TouchEvent) {
   dragY = 0
   isDragging.value = true
   isSnapping.value = false
+  emit('swipe-start')
 }
 
 function onTouchMove(e: TouchEvent) {
@@ -70,6 +73,7 @@ function triggerSwipeOut(direction: 'left' | 'right' | 'up') {
     if (direction === 'right') emit('done')
     else if (direction === 'left') emit('later')
     else emit('weightUp')
+    emit('swipe-end')
   }, 300)
 }
 
@@ -79,6 +83,7 @@ function snapBack() {
   dragX.value = 0
   setTimeout(() => {
     isSnapping.value = false
+    emit('swipe-end')
   }, 380) // 80ms buffer past the 300ms spring transition
 }
 
@@ -91,6 +96,7 @@ function onTouchEnd() {
     snapBack()
   } else {
     isDragging.value = false
+    emit('swipe-end')
   }
 }
 
