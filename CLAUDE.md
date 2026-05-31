@@ -3,6 +3,7 @@
 ## Git
 
 - **Never commit, push, or stage files unless the user explicitly asks.** Reading git state (log, diff, status, show) is always fine.
+- If you are asked to commit, the message should be in the style I have used already, e.g. "feat: phase 3 part 1 - <small description>" after implementing or "fix: phase 2 review fixed" after phase reviews
 
 ## Vue 3
 
