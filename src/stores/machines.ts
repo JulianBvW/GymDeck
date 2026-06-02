@@ -1,3 +1,4 @@
+import { computed } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
 
@@ -37,5 +38,7 @@ export const useMachinesStore = defineStore('machines', () => {
     machines.value = machines.value.filter(m => m.id !== id)
   }
 
-  return { machines, addMachine, updateMachine, deleteMachine }
+  const totalWeight = computed(() => machines.value.reduce((sum, m) => sum + m.currentWeight, 0))
+
+  return { machines, totalWeight, addMachine, updateMachine, deleteMachine }
 })
