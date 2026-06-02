@@ -24,6 +24,7 @@ const cardEl = ref<HTMLElement | null>(null)
 let startX = 0
 let startY = 0
 let dragY = 0 // non-reactive; only used to guard horizontal preventDefault
+let swipeStarted = false // true once horizontal drag exceeds 10px threshold
 const isDragging = ref(false)
 const isSnapping = ref(false)
 const dragX = ref(0)
@@ -49,7 +50,7 @@ function onTouchStart(e: TouchEvent) {
   dragY = 0
   isDragging.value = true
   isSnapping.value = false
-  emit('swipe-start')
+  swipeStarted = false
 }
 
 function onTouchMove(e: TouchEvent) {
@@ -61,6 +62,11 @@ function onTouchMove(e: TouchEvent) {
   // Only block native scroll when horizontal movement dominates
   if (Math.abs(dragX.value) > Math.abs(dragY)) {
     e.preventDefault()
+  }
+  // Delay swipe-start until horizontal intent is clear — avoids flagging button taps
+  if (!swipeStarted && Math.abs(dragX.value) > 10) {
+    swipeStarted = true
+    emit('swipe-start')
   }
 }
 
@@ -74,7 +80,7 @@ function triggerSwipeOut(direction: 'left' | 'right' | 'up') {
     if (direction === 'right') emit('done')
     else if (direction === 'left') emit('later')
     else emit('weightUp')
-    emit('swipe-end')
+    if (swipeStarted) emit('swipe-end')
   }, 300)
 }
 
@@ -84,7 +90,7 @@ function snapBack() {
   dragX.value = 0
   setTimeout(() => {
     isSnapping.value = false
-    emit('swipe-end')
+    if (swipeStarted) emit('swipe-end')
   }, 380) // 80ms buffer past the 300ms spring transition
 }
 
@@ -102,7 +108,7 @@ function onTouchEnd() {
     snapBack()
   } else {
     isDragging.value = false
-    emit('swipe-end')
+    if (swipeStarted) emit('swipe-end')
   }
 }
 
@@ -176,7 +182,7 @@ onUnmounted(() => {
           :style="{ backgroundColor: '#9ca3af', opacity: disableLater ? 0.35 : 1 }"
           :disabled="disableLater"
           aria-label="Later"
-          @click="!disableLater && triggerSwipeOut('left')"
+          @click="triggerSwipeOut('left')"
         >
           <Clock :size="22" />
         </button>

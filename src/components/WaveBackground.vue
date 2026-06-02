@@ -13,7 +13,7 @@ const props = defineProps<{
 const containerRef = ref<HTMLElement | null>(null)
 const { width, height } = useElementSize(containerRef, { width: 390, height: 844 })
 
-const uid = getCurrentInstance()!.uid
+const uid = getCurrentInstance()?.uid ?? 0
 
 const LAYERS = [
   { amp: 34, len: 460, dur: 22, yOffset: 0 },  // back, darkest (wave1)
@@ -26,7 +26,6 @@ const COLORS = computed(() => [props.wave1, props.wave2, props.wave3])
 const MAX_HALF_PERIODS = 12
 
 function buildWavePath(
-  W: number,
   H: number,
   amp: number,
   len: number,
@@ -64,7 +63,7 @@ const baseY = computed(() => {
 
 const paths = computed(() =>
   LAYERS.map((layer) =>
-    buildWavePath(width.value, height.value, layer.amp, layer.len, baseY.value, layer.yOffset, props.flip ?? false),
+    buildWavePath(height.value, layer.amp, layer.len, baseY.value, layer.yOffset, props.flip ?? false),
   ),
 )
 </script>

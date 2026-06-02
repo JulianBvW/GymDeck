@@ -164,6 +164,7 @@ const weightIncreaseCount = computed(
   () => sessionsStore.todaySession?.machinesDone.filter((e) => e.weightIncreased).length ?? 0,
 )
 
+// Exposes the Ref<boolean> itself. Parent must access as cardStackRef.value.isSwiping.value
 defineExpose({ isSwiping })
 </script>
 
