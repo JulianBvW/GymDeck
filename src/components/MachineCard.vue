@@ -4,9 +4,10 @@ import { X, Clock, ArrowUp, Check } from 'lucide-vue-next'
 import LocationPulse from '@/components/LocationPulse.vue'
 import type { Machine } from '@/stores/machines'
 
-defineProps<{
+const props = defineProps<{
   machine: Machine
   accent: string
+  disableLater?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -91,7 +92,12 @@ function onTouchEnd() {
   if (!isDragging.value) return
   const absX = Math.abs(dragX.value)
   if (absX > 80) {
-    triggerSwipeOut(dragX.value > 0 ? 'right' : 'left')
+    const dir = dragX.value > 0 ? 'right' : 'left'
+    if (dir === 'left' && props.disableLater) {
+      snapBack()
+    } else {
+      triggerSwipeOut(dir)
+    }
   } else if (absX > 5) {
     snapBack()
   } else {
@@ -166,10 +172,11 @@ onUnmounted(() => {
       <div class="flex items-center justify-between">
         <!-- Later -->
         <button
-          class="w-14 h-14 rounded-full flex items-center justify-center text-white"
-          style="background-color: #9ca3af"
+          class="w-14 h-14 rounded-full flex items-center justify-center text-white transition-opacity"
+          :style="{ backgroundColor: '#9ca3af', opacity: disableLater ? 0.35 : 1 }"
+          :disabled="disableLater"
           aria-label="Later"
-          @click="triggerSwipeOut('left')"
+          @click="!disableLater && triggerSwipeOut('left')"
         >
           <Clock :size="22" />
         </button>

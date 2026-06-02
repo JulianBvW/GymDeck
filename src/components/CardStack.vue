@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import MachineCard from '@/components/MachineCard.vue'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
@@ -13,6 +13,12 @@ const palette = useDailyPalette()
 const remainingMachines = ref<Machine[]>([])
 const isSwiping = ref(false)
 const isPromoting = ref(false)
+const returningMachineId = ref<string | null>(null)
+const returningFromLeft = ref(false)
+const promotingMachineId = ref<string | null>(null)
+const promotingInStartPos = ref(false)
+
+const isLastCard = computed(() => remainingMachines.value.length <= 1)
 
 function shuffle(ids: string[]): string[] {
   const a = [...ids]
@@ -41,11 +47,42 @@ onMounted(() => {
     .filter((m) => !doneMachineIds.has(m.id))
 })
 
-const visibleMachines = computed(() => remainingMachines.value.slice(0, 3))
+const visibleMachines = computed(() => {
+  const base = remainingMachines.value.slice(0, 3)
+  if (returningMachineId.value) {
+    const returning = remainingMachines.value.find((m) => m.id === returningMachineId.value)
+    if (returning && !base.includes(returning)) return [...base, returning]
+  }
+  return base
+})
 
 const springTransition = { transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)' }
 
-function cardWrapperStyle(index: number) {
+function cardWrapperStyle(index: number, machineId: string) {
+  // Returning card: fly in from the left to its peeking position.
+  // Always targets the 2nd-peek slot visually, except when only 2 cards remain (index 1).
+  if (machineId === returningMachineId.value) {
+    const peek1 = index === 1
+    const target = peek1 ? 'translateY(36px) scale(0.93)' : 'translateY(74px) scale(0.86)'
+    return {
+      transform: returningFromLeft.value ? `translateX(-150%) ${target}` : target,
+      transformOrigin: 'top center',
+      zIndex: peek1 ? 1 : index === 2 ? 0 : -1,
+      pointerEvents: 'none' as const,
+      transition: returningFromLeft.value ? 'none' : 'transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+    }
+  }
+
+  // Promoting card: explicit FLIP so the "from" transform is committed to the DOM
+  // before we animate — needed because Vue may move the element in the DOM (2-card case)
+  // which would otherwise discard the browser's remembered "from" value.
+  if (machineId === promotingMachineId.value && index === 0) {
+    if (promotingInStartPos.value) {
+      return { zIndex: 2, transform: 'translateY(36px) scale(0.93)', transformOrigin: 'top center' as const, transition: 'none' }
+    }
+    return { zIndex: 2, transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)' }
+  }
+
   const promoting = isPromoting.value ? springTransition : {}
   if (index === 0) return { zIndex: 2, ...promoting }
   if (index === 1)
@@ -89,11 +126,33 @@ function onWeightUp() {
   removeTopCard()
 }
 
-function onLater() {
+async function onLater() {
   const machine = remainingMachines.value[0]
   if (!machine) return
+  const newTop = remainingMachines.value[1]
+
+  returningMachineId.value = machine.id
+  returningFromLeft.value = true
+  // Track the card that will become the new top so we can FLIP-animate it
+  if (newTop) {
+    promotingMachineId.value = newTop.id
+    promotingInStartPos.value = true
+  }
+
   remainingMachines.value.push(machine)
   removeTopCard()
+  await nextTick()
+  // Double rAF: browser commits the "from" state for both animations before we trigger transitions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      returningFromLeft.value = false
+      promotingInStartPos.value = false
+      setTimeout(() => {
+        returningMachineId.value = null
+        promotingMachineId.value = null
+      }, 500)
+    })
+  })
 }
 
 function onSkip() {
@@ -109,7 +168,7 @@ defineExpose({ isSwiping })
 </script>
 
 <template>
-  <div class="relative" style="width: min(80vw, 360px); height: min(80vw, 360px)">
+  <div class="relative z-0" style="width: min(80vw, 360px); height: min(80vw, 360px)">
     <!-- Session complete -->
     <div
       v-if="remainingMachines.length === 0"
@@ -128,11 +187,12 @@ defineExpose({ isSwiping })
         v-for="(machine, index) in visibleMachines"
         :key="machine.id"
         class="absolute left-0 right-0 top-0"
-        :style="cardWrapperStyle(index)"
+        :style="cardWrapperStyle(index, machine.id)"
       >
         <MachineCard
           :machine="machine"
           :accent="palette.accent"
+          :disable-later="isLastCard"
           @done="onDone"
           @weight-up="onWeightUp"
           @later="onLater"
