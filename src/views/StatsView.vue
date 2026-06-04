@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronDown } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
+import WeekHeatmap from '@/components/WeekHeatmap.vue'
+import WeightChart from '@/components/WeightChart.vue'
 import { useUIStore } from '@/stores/ui'
 import { useSessionsStore } from '@/stores/sessions'
 import { useMachinesStore } from '@/stores/machines'
@@ -15,9 +17,9 @@ const machinesStore = useMachinesStore()
 const palette = useDailyPalette()
 
 const stats = computed(() => [
-  { value: sessionsStore.currentStreak, label: 'week streak' },
-  { value: sessionsStore.totalSessions, label: 'sessions' },
-  { value: machinesStore.totalWeight + ' kg', label: 'total weight' },
+  { value: sessionsStore.currentStreak, unit: 'weeks', label: 'STREAK' },
+  { value: sessionsStore.totalSessions, unit: '/ 52w', label: 'SESSIONS' },
+  { value: Math.round(machinesStore.totalWeight), unit: 'kg', label: 'VOLUME' },
 ])
 
 function goBack() {
@@ -36,31 +38,58 @@ function goBack() {
       :wave3="palette.wave3"
     />
 
-    <div class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 py-4">
-      <span class="font-semibold text-gray-900">Statistics</span>
-      <button
-        class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full"
-        aria-label="Back"
-        @click="goBack"
-      >
-        <ChevronDown :size="22" />
-      </button>
-    </div>
+    <div class="relative z-10 flex-1 overflow-y-auto pt-4 pb-8 px-5 flex flex-col gap-6">
+      <!-- Header + page title -->
+      <div class="flex flex-col gap-0">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase"
+            >Statistics</span
+          >
+          <button
+            class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full"
+            aria-label="Back"
+            @click="goBack"
+          >
+            <ChevronDown :size="22" />
+          </button>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900">Your progress</h2>
+      </div>
 
-    <div class="relative z-10 flex-1 overflow-y-auto pt-16 pb-8 px-5 flex flex-col gap-6">
       <!-- Quick stats row -->
       <div class="flex gap-3">
         <div
           v-for="stat in stats"
           :key="stat.label"
-          class="flex-1 bg-white rounded-2xl shadow-sm py-5 flex flex-col items-center gap-1"
+          class="flex-1 bg-white rounded-2xl shadow-sm px-4 py-3 flex flex-col gap-1"
         >
-          <span class="text-2xl font-bold text-gray-900">{{ stat.value }}</span>
-          <span class="text-xs text-gray-400 uppercase tracking-wide">{{ stat.label }}</span>
+          <span class="text-[10px] font-semibold tracking-widest text-gray-400">{{
+            stat.label
+          }}</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-2xl font-bold text-gray-900">{{ stat.value }}</span>
+            <span class="text-sm text-gray-400">{{ stat.unit }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Parts 3, 4 go here -->
+      <!-- Week heatmap -->
+      <WeekHeatmap />
+
+      <!-- Per-machine weight charts -->
+      <div>
+        <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2 px-1">
+          Weight evolution
+        </p>
+        <div class="flex flex-col gap-3">
+          <WeightChart
+            v-for="machine in machinesStore.machines"
+            :key="machine.id"
+            :machine-id="machine.id"
+            :machine-name="machine.name"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
