@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
+import { toDateString, startOfWeek } from '@/utils/date'
 
 export interface MachineEntry {
   machineId: string
@@ -14,21 +15,6 @@ export interface Session {
   machinesDone: MachineEntry[]
 }
 
-function toDateString(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
-function startOfWeek(dateStr: string): string {
-  // Parse as local midnight to avoid UTC offset shifting the date
-  const d = new Date(dateStr + 'T00:00:00')
-  const day = d.getDay() // 0=Sun, 1=Mon … 6=Sat
-  const diff = day === 0 ? 6 : day - 1 // days back to Monday
-  d.setDate(d.getDate() - diff)
-  return toDateString(d)
-}
 
 export const useSessionsStore = defineStore('sessions', () => {
   const sessions = useLocalStorage<Session[]>('gymdeck-sessions', [])

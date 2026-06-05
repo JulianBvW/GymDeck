@@ -87,13 +87,13 @@ const paths = computed(() =>
       </defs>
 
       <g class="wave-group-0">
-        <path class="wave-path" :style="{ d: `path('${paths[0]}')` }" :fill="`url(#wg${uid}-0)`" />
+        <path class="wave-path" :d="paths[0]" :fill="`url(#wg${uid}-0)`" />
       </g>
       <g class="wave-group-1">
-        <path class="wave-path" :style="{ d: `path('${paths[1]}')` }" :fill="`url(#wg${uid}-1)`" />
+        <path class="wave-path" :d="paths[1]" :fill="`url(#wg${uid}-1)`" />
       </g>
       <g class="wave-group-2">
-        <path class="wave-path" :style="{ d: `path('${paths[2]}')` }" :fill="`url(#wg${uid}-2)`" />
+        <path class="wave-path" :d="paths[2]" :fill="`url(#wg${uid}-2)`" />
       </g>
     </svg>
   </div>

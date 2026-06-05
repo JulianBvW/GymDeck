@@ -6,7 +6,9 @@ const uiStore = useUIStore()
 </script>
 
 <template>
-  <Transition :name="`slide-${uiStore.transitionDirection}`">
-    <RouterView :key="$route.path" />
-  </Transition>
+  <RouterView v-slot="{ Component }">
+    <Transition :name="`slide-${uiStore.transitionDirection}`">
+      <component :is="Component" :key="$route.path" />
+    </Transition>
+  </RouterView>
 </template>
