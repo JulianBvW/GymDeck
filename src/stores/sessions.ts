@@ -51,7 +51,7 @@ export const useSessionsStore = defineStore('sessions', () => {
     const now = new Date()
     const thisWeek = startOfWeek(toDateString(now))
 
-    let weekCursor = new Date(thisWeek + 'T00:00:00')
+    const weekCursor = new Date(thisWeek + 'T00:00:00')
     while (true) {
       const weekStr = toDateString(weekCursor)
       if (!validDates.has(weekStr)) break

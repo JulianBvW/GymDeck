@@ -21,9 +21,9 @@ const points = computed(() =>
       const entry = s.machinesDone.find(e => e.machineId === props.machineId)!
       // Format date as German "DD.MM."
       const parts = s.date.slice(5).split('-')
-      const mm = parts[0] ?? ''
-      const dd = parts[1] ?? ''
-      return { x: `${dd}.${mm}.`, y: entry.weight }
+      const month = parts[0] ?? ''
+      const day = parts[1] ?? ''
+      return { x: `${day}.${month}.`, y: entry.weight }
     })
 )
 

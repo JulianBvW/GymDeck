@@ -40,11 +40,12 @@ function weekState(weekStart: string): WeekState {
 
 const quarters = computed(() => {
   const ws = weeks.value
+  const toWeekData = (weekStart: string) => ({ weekStart, state: weekState(weekStart) })
   return [
-    { label: 'Q1', weeks: ws.slice(0, 13) },
-    { label: 'Q2', weeks: ws.slice(13, 26) },
-    { label: 'Q3', weeks: ws.slice(26, 39) },
-    { label: 'Q4', weeks: ws.slice(39, 52) },
+    { label: 'Q1', weeks: ws.slice(0, 13).map(toWeekData) },
+    { label: 'Q2', weeks: ws.slice(13, 26).map(toWeekData) },
+    { label: 'Q3', weeks: ws.slice(26, 39).map(toWeekData) },
+    { label: 'Q4', weeks: ws.slice(39, 52).map(toWeekData) },
   ]
 })
 </script>
@@ -60,13 +61,13 @@ const quarters = computed(() => {
         <div class="grid gap-1 flex-1" style="grid-template-columns: repeat(13, 1fr)">
           <div
             v-for="w in q.weeks"
-            :key="w"
+            :key="w.weekStart"
             class="aspect-square rounded-sm"
-            :class="{ 'border border-dashed border-gray-300': weekState(w) === 'future' }"
+            :class="{ 'border border-dashed border-gray-300': w.state === 'future' }"
             :style="{
               backgroundColor:
-                weekState(w) === 'done'   ? '#1a1a1a' :
-                weekState(w) === 'future' ? '#f5f5f5' :
+                w.state === 'done'   ? '#1a1a1a' :
+                w.state === 'future' ? '#f5f5f5' :
                 '#e0e0e0',
             }"
           />
