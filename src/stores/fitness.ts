@@ -51,5 +51,11 @@ export const useFitnessStore = defineStore('fitness', () => {
     }
   }
 
-  return { checks, measurements, addCheck, updateCheck, deleteCheck, logMeasurement }
+  function removeLogEntry(checkId: string, date: string) {
+    measurements.value = measurements.value.filter(
+      m => !(m.checkId === checkId && m.date === date)
+    )
+  }
+
+  return { checks, measurements, addCheck, updateCheck, deleteCheck, logMeasurement, removeLogEntry }
 })

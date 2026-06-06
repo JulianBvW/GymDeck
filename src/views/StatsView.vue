@@ -40,20 +40,14 @@ function goBack() {
 
     <div class="relative z-10 flex-1 overflow-y-auto pt-4 pb-8 px-5 flex flex-col gap-6">
       <!-- Header + page title -->
-      <div class="flex flex-col gap-0">
+      <div class="flex flex-col gap-0 cursor-pointer touch-manipulation" @click="goBack">
         <div class="flex items-center justify-between">
-          <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase"
-            >Statistics</span
-          >
-          <button
-            class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full"
-            aria-label="Back"
-            @click="goBack"
-          >
+          <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase">Statistics</span>
+          <div class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full">
             <ChevronDown :size="22" />
-          </button>
+          </div>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900">Your progress</h2>
+        <h1 class="-mt-2 text-2xl font-bold text-gray-900">Your progress</h1>
       </div>
 
       <!-- Quick stats row -->
