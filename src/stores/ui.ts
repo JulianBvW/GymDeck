@@ -13,9 +13,10 @@ export const useUIStore = defineStore('ui', () => {
   // Persisted: daily palette selection
   const dailyPaletteIndex = useLocalStorage<number>('gymdeck-palette-index', 0)
   const dailyPaletteDate = useLocalStorage<string>('gymdeck-palette-date', '')
+  const lastExportDate = useLocalStorage<string>('gymdeck-last-export', '')
 
   // Not persisted: navigation transition direction
   const transitionDirection = ref<TransitionDirection>('right')
 
-  return { dailyPaletteIndex, dailyPaletteDate, transitionDirection }
+  return { dailyPaletteIndex, dailyPaletteDate, lastExportDate, transitionDirection }
 })

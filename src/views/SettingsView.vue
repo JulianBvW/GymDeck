@@ -7,9 +7,13 @@ import MachineEditor from '@/components/MachineEditor.vue'
 import FitnessCheckEditor from '@/components/FitnessCheckEditor.vue'
 import { useUIStore } from '@/stores/ui'
 import { useMachinesStore } from '@/stores/machines'
+import type { Machine } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
+import type { Session } from '@/stores/sessions'
 import { useFitnessStore } from '@/stores/fitness'
+import type { FitnessCheck, FitnessMeasurement } from '@/stores/fitness'
 import { useDailyPalette } from '@/composables/useDailyPalette'
+import { toDateString } from '@/utils/date'
 
 const router = useRouter()
 const uiStore = useUIStore()
@@ -45,6 +49,91 @@ function addMachine() {
 function addCheck() {
   const id = fitnessStore.addCheck({ name: 'New Check', unit: 'reps', stepSize: 1, min: 0, max: 100 })
   newlyAddedCheckId.value = id
+}
+
+// --- Data export / import ---
+
+interface ImportPayload {
+  machines: Machine[]
+  sessions: Session[]
+  fitnessChecks: FitnessCheck[]
+  fitnessMeasurements: FitnessMeasurement[]
+}
+
+function isValidImport(obj: unknown): obj is ImportPayload {
+  if (typeof obj !== 'object' || obj === null) return false
+  const o = obj as Record<string, unknown>
+  return (
+    Array.isArray(o['machines']) &&
+    Array.isArray(o['sessions']) &&
+    Array.isArray(o['fitnessChecks']) &&
+    Array.isArray(o['fitnessMeasurements'])
+  )
+}
+
+const fileInput = ref<HTMLInputElement | null>(null)
+const importPayload = ref<ImportPayload | null>(null)
+const confirmingImport = ref(false)
+const importError = ref<string | null>(null)
+
+function formatExportDate(date: string): string {
+  return date.slice(8, 10) + '.' + date.slice(5, 7) + '.' + date.slice(0, 4)
+}
+
+function exportData() {
+  const payload = {
+    machines: machinesStore.machines,
+    sessions: sessionsStore.sessions,
+    fitnessChecks: fitnessStore.checks,
+    fitnessMeasurements: fitnessStore.measurements,
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `gymdeck-backup-${toDateString(new Date())}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  uiStore.lastExportDate = toDateString(new Date())
+}
+
+function onFileSelected(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    try {
+      const parsed: unknown = JSON.parse(ev.target?.result as string)
+      if (!isValidImport(parsed)) {
+        importError.value = 'Invalid backup file — missing required data.'
+        return
+      }
+      importPayload.value = parsed
+      confirmingImport.value = true
+      importError.value = null
+    } catch {
+      importError.value = 'Could not read file — make sure it is a valid GymDeck backup.'
+    }
+  }
+  reader.readAsText(file)
+  input.value = ''
+}
+
+function confirmImport() {
+  if (!importPayload.value) return
+  machinesStore.machines = importPayload.value.machines
+  sessionsStore.sessions = importPayload.value.sessions
+  fitnessStore.checks = importPayload.value.fitnessChecks
+  fitnessStore.measurements = importPayload.value.fitnessMeasurements
+  importPayload.value = null
+  confirmingImport.value = false
+}
+
+function cancelImport() {
+  importPayload.value = null
+  confirmingImport.value = false
+  importError.value = null
 }
 </script>
 
@@ -110,12 +199,67 @@ function addCheck() {
         </button>
       </div>
 
-      <!-- Data (Part 3) -->
+      <!-- Data -->
       <div>
         <p class="text-xs font-semibold tracking-widest text-gray-600 uppercase mb-2 px-1">Data</p>
-        <div class="h-12 flex items-center justify-center text-sm text-gray-300 bg-white rounded-2xl shadow-sm">
-          Coming soon
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <!-- Export row -->
+          <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-semibold text-gray-900">Export</span>
+              <span v-if="uiStore.lastExportDate" class="text-xs text-gray-400">
+                Last: {{ formatExportDate(uiStore.lastExportDate) }}
+              </span>
+            </div>
+            <button
+              class="px-4 py-2 rounded-xl text-sm font-semibold text-white touch-manipulation"
+              :style="{ backgroundColor: palette.accent }"
+              @click="exportData"
+            >
+              Export
+            </button>
+          </div>
+
+          <!-- Import row -->
+          <div class="border-t border-gray-100 px-4 py-3">
+            <div v-if="!confirmingImport" class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-900">Import</span>
+              <button
+                class="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 touch-manipulation"
+                @click="fileInput?.click()"
+              >
+                Import
+              </button>
+            </div>
+            <div v-else class="flex flex-col gap-2">
+              <p class="text-sm text-gray-600">This will overwrite all data.</p>
+              <div class="flex gap-2">
+                <button
+                  class="flex-1 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 touch-manipulation"
+                  @click="cancelImport"
+                >
+                  Cancel
+                </button>
+                <button
+                  class="flex-1 py-2 rounded-xl text-sm font-semibold text-white touch-manipulation"
+                  style="background-color: #ef4444"
+                  @click="confirmImport"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+            <p v-if="importError" class="mt-2 text-xs text-red-500">{{ importError }}</p>
+          </div>
         </div>
+
+        <input
+          ref="fileInput"
+          type="file"
+          accept=".json"
+          class="hidden"
+          @change="onFileSelected"
+        />
       </div>
     </div>
   </div>
