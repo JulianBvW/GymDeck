@@ -30,8 +30,10 @@ export const useFitnessStore = defineStore('fitness', () => {
     checks.value = SEED_CHECKS
   }
 
-  function addCheck(data: Omit<FitnessCheck, 'id'>) {
-    checks.value.push({ id: crypto.randomUUID(), ...data })
+  function addCheck(data: Omit<FitnessCheck, 'id'>): string {
+    const id = crypto.randomUUID()
+    checks.value.push({ id, ...data })
+    return id
   }
 
   function updateCheck(id: string, data: Partial<Omit<FitnessCheck, 'id'>>) {

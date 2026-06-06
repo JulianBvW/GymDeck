@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Settings } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
 import FitnessCard from '@/components/FitnessCard.vue'
 import { useUIStore } from '@/stores/ui'
@@ -15,6 +15,11 @@ const palette = useDailyPalette()
 function goBack() {
   uiStore.transitionDirection = 'up'
   router.push('/')
+}
+
+function goToSettings() {
+  uiStore.transitionDirection = 'right'
+  router.push('/settings')
 }
 </script>
 
@@ -36,8 +41,16 @@ function goBack() {
       <div class="flex flex-col gap-0 cursor-pointer touch-manipulation" @click="goBack">
         <div class="flex items-center justify-between">
           <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase">Fitness</span>
-          <div class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full">
-            <ChevronDown :size="22" />
+          <div class="flex items-center gap-1">
+            <button
+              class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full touch-manipulation"
+              @click.stop="goToSettings"
+            >
+              <Settings :size="18" />
+            </button>
+            <div class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full">
+              <ChevronDown :size="22" />
+            </div>
           </div>
         </div>
         <h1 class="-mt-2 text-2xl font-bold text-gray-900">Daily checks</h1>

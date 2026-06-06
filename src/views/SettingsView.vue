@@ -4,15 +4,18 @@ import { useRouter } from 'vue-router'
 import { ChevronLeft } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
 import MachineEditor from '@/components/MachineEditor.vue'
+import FitnessCheckEditor from '@/components/FitnessCheckEditor.vue'
 import { useUIStore } from '@/stores/ui'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
+import { useFitnessStore } from '@/stores/fitness'
 import { useDailyPalette } from '@/composables/useDailyPalette'
 
 const router = useRouter()
 const uiStore = useUIStore()
 const machinesStore = useMachinesStore()
 const sessionsStore = useSessionsStore()
+const fitnessStore = useFitnessStore()
 const palette = useDailyPalette()
 
 const doneCount = computed(() => sessionsStore.todaySession?.machinesDone.length ?? 0)
@@ -21,6 +24,7 @@ const progress = computed(() =>
 )
 
 const newlyAddedMachineId = ref<string | null>(null)
+const newlyAddedCheckId = ref<string | null>(null)
 
 function goBack() {
   uiStore.transitionDirection = 'left'
@@ -36,6 +40,11 @@ function addMachine() {
     stepSize: 2.5,
   })
   newlyAddedMachineId.value = id
+}
+
+function addCheck() {
+  const id = fitnessStore.addCheck({ name: 'New Check', unit: 'reps', stepSize: 1, min: 0, max: 100 })
+  newlyAddedCheckId.value = id
 }
 </script>
 
@@ -82,12 +91,23 @@ function addMachine() {
         </button>
       </div>
 
-      <!-- Fitness Checks (Part 2) -->
+      <!-- Fitness Checks -->
       <div>
         <p class="text-xs font-semibold tracking-widest text-gray-600 uppercase mb-2 px-1">Fitness Checks</p>
-        <div class="h-12 flex items-center justify-center text-sm text-gray-300 bg-white rounded-2xl shadow-sm">
-          Coming soon
+        <div class="flex flex-col gap-2">
+          <FitnessCheckEditor
+            v-for="check in fitnessStore.checks"
+            :key="check.id"
+            :check-id="check.id"
+            :start-open="check.id === newlyAddedCheckId"
+          />
         </div>
+        <button
+          class="mt-3 w-full py-3 rounded-2xl border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-500 bg-white/80 touch-manipulation"
+          @click="addCheck"
+        >
+          + Add Fitness Check
+        </button>
       </div>
 
       <!-- Data (Part 3) -->
