@@ -78,5 +78,9 @@ export const useSessionsStore = defineStore('sessions', () => {
     }
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, saveTodayMachineOrder, startSessionIfNeeded, logEntry }
+  function clearMachineOrder() {
+    machineOrderStorage.value = null
+  }
+
+  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, saveTodayMachineOrder, clearMachineOrder, startSessionIfNeeded, logEntry }
 })

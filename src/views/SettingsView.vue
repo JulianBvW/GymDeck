@@ -63,11 +63,12 @@ interface ImportPayload {
 function isValidImport(obj: unknown): obj is ImportPayload {
   if (typeof obj !== 'object' || obj === null) return false
   const o = obj as Record<string, unknown>
+  const isObjArray = (v: unknown) => Array.isArray(v) && v.every(item => typeof item === 'object' && item !== null)
   return (
-    Array.isArray(o['machines']) &&
-    Array.isArray(o['sessions']) &&
-    Array.isArray(o['fitnessChecks']) &&
-    Array.isArray(o['fitnessMeasurements'])
+    isObjArray(o['machines']) &&
+    isObjArray(o['sessions']) &&
+    isObjArray(o['fitnessChecks']) &&
+    isObjArray(o['fitnessMeasurements'])
   )
 }
 
@@ -81,6 +82,7 @@ function formatExportDate(date: string): string {
 }
 
 function exportData() {
+  const dateStr = toDateString(new Date())
   const payload = {
     machines: machinesStore.machines,
     sessions: sessionsStore.sessions,
@@ -91,10 +93,10 @@ function exportData() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `gymdeck-backup-${toDateString(new Date())}.json`
+  a.download = `gymdeck-backup-${dateStr}.json`
   a.click()
   URL.revokeObjectURL(url)
-  uiStore.lastExportDate = toDateString(new Date())
+  uiStore.lastExportDate = dateStr
 }
 
 function onFileSelected(e: Event) {
@@ -124,6 +126,7 @@ function confirmImport() {
   if (!importPayload.value) return
   machinesStore.machines = importPayload.value.machines
   sessionsStore.sessions = importPayload.value.sessions
+  sessionsStore.clearMachineOrder()
   fitnessStore.checks = importPayload.value.fitnessChecks
   fitnessStore.measurements = importPayload.value.fitnessMeasurements
   importPayload.value = null
