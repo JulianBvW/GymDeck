@@ -6,6 +6,8 @@ export interface FitnessCheck {
   name: string
   unit: string
   stepSize: number
+  min?: number
+  max?: number
 }
 
 export interface FitnessMeasurement {
@@ -16,8 +18,8 @@ export interface FitnessMeasurement {
 }
 
 const SEED_CHECKS: FitnessCheck[] = [
-  { id: crypto.randomUUID(), name: 'Push Ups',         unit: 'reps', stepSize: 1   },
-  { id: crypto.randomUUID(), name: 'Stretching Reach', unit: 'cm',   stepSize: 0.5 },
+  { id: crypto.randomUUID(), name: 'Push Ups',         unit: 'reps', stepSize: 1,   min: 0, max: 200 },
+  { id: crypto.randomUUID(), name: 'Stretching Reach', unit: 'cm',   stepSize: 0.5, min: 0, max: 100 },
 ]
 
 export const useFitnessStore = defineStore('fitness', () => {

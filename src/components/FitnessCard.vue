@@ -14,12 +14,11 @@ const fitnessStore = useFitnessStore()
 const sessionsStore = useSessionsStore()
 const palette = useDailyPalette()
 
-const check = computed(() => fitnessStore.checks.find(c => c.id === props.checkId)!)
+const check = computed(() => fitnessStore.checks.find(c => c.id === props.checkId))
 
-// Derive range from step: fractional step → smaller scale (e.g. cm reach vs reps)
-const min = 0
-const max = computed(() => check.value.stepSize < 1 ? 100 : 200)
-const step = computed(() => check.value.stepSize)
+const min = computed(() => check.value?.min ?? 0)
+const max = computed(() => check.value?.max ?? ((check.value?.stepSize ?? 1) < 1 ? 100 : 200))
+const step = computed(() => check.value?.stepSize ?? 1)
 
 // Picker initial value: today's saved measurement → last ever measurement → 0
 const pickerValue = ref(
@@ -27,7 +26,7 @@ const pickerValue = ref(
   ?? [...fitnessStore.measurements]
       .filter(m => m.checkId === props.checkId)
       .sort((a, b) => b.date.localeCompare(a.date))[0]?.value
-  ?? 0
+  ?? min.value
 )
 
 // Historical points: exclude today (shown as live grey dot), last 20
@@ -114,7 +113,7 @@ function confirm() {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
+  <div v-if="check" class="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
     <!-- Header: name + confirm button -->
     <div class="flex items-center justify-between">
       <p class="text-sm font-semibold text-gray-900">{{ check.name }}</p>
