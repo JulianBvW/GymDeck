@@ -25,8 +25,10 @@ export const useMachinesStore = defineStore('machines', () => {
     machines.value = SEED_MACHINES
   }
 
-  function addMachine(data: Omit<Machine, 'id'>) {
-    machines.value.push({ id: crypto.randomUUID(), ...data })
+  function addMachine(data: Omit<Machine, 'id'>): string {
+    const id = crypto.randomUUID()
+    machines.value.push({ id, ...data })
+    return id
   }
 
   function updateMachine(id: string, data: Partial<Omit<Machine, 'id'>>) {

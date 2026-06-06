@@ -40,6 +40,14 @@ onMounted(() => {
   if (!orderedIds) {
     orderedIds = shuffle(machinesStore.machines.map((m) => m.id))
     sessionsStore.saveTodayMachineOrder(orderedIds)
+  } else {
+    // Machines added after today's order was saved — append them at the end
+    const savedSet = new Set(orderedIds)
+    const newIds = machinesStore.machines.filter(m => !savedSet.has(m.id)).map(m => m.id)
+    if (newIds.length > 0) {
+      orderedIds = [...orderedIds, ...newIds]
+      sessionsStore.saveTodayMachineOrder(orderedIds)
+    }
   }
   remainingMachines.value = orderedIds
     .map((id) => machinesStore.machines.find((m) => m.id === id))
