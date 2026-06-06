@@ -57,14 +57,14 @@ function onBottomZoneTap() {
       <span class="text-sm font-medium text-gray-500">{{ doneCount }} / {{ totalCount }}</span>
       <div class="flex items-center gap-1">
         <button
-          class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full"
+          class="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full touch-manipulation"
           aria-label="Fitness"
           @click="goToFitness"
         >
           <Activity :size="20" />
         </button>
         <button
-          class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full"
+          class="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-full touch-manipulation"
           aria-label="Settings"
           @click="goToSettings"
         >

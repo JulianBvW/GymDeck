@@ -158,7 +158,7 @@ onUnmounted(() => {
           {{ machine.name }}
         </span>
         <button
-          class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full"
+          class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full touch-manipulation"
           aria-label="Skip for today"
           @click="emit('skip')"
         >

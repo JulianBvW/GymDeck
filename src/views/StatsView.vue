@@ -43,7 +43,7 @@ function goBack() {
       <div class="flex flex-col gap-0 cursor-pointer touch-manipulation" @click="goBack">
         <div class="flex items-center justify-between">
           <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase">Statistics</span>
-          <div class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full">
+          <div class="w-11 h-11 flex items-center justify-center text-gray-500 rounded-full">
             <ChevronDown :size="22" />
           </div>
         </div>

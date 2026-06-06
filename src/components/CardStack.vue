@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import MachineCard from '@/components/MachineCard.vue'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
+import { useUIStore } from '@/stores/ui'
 import { useDailyPalette } from '@/composables/useDailyPalette'
 import type { Machine } from '@/stores/machines'
 
+const router = useRouter()
 const machinesStore = useMachinesStore()
 const sessionsStore = useSessionsStore()
+const uiStore = useUIStore()
 const palette = useDailyPalette()
 
 const remainingMachines = ref<Machine[]>([])
@@ -31,7 +35,7 @@ function shuffle(ids: string[]): string[] {
   return a
 }
 
-onMounted(() => {
+function initCards() {
   const doneMachineIds = new Set(
     sessionsStore.todaySession?.machinesDone.map((e) => e.machineId) ?? [],
   )
@@ -53,7 +57,19 @@ onMounted(() => {
     .map((id) => machinesStore.machines.find((m) => m.id === id))
     .filter((m): m is Machine => m !== undefined)
     .filter((m) => !doneMachineIds.has(m.id))
-})
+}
+
+function goToSettings() {
+  uiStore.transitionDirection = 'right'
+  router.push('/settings')
+}
+
+function resetSession() {
+  sessionsStore.clearTodaySession()
+  initCards()
+}
+
+onMounted(initCards)
 
 const visibleMachines = computed(() => {
   const base = remainingMachines.value.slice(0, 3)
@@ -178,9 +194,25 @@ defineExpose({ isSwiping })
 
 <template>
   <div class="relative z-0" style="width: min(80vw, 360px); height: min(80vw, 360px)">
+    <!-- No machines configured -->
+    <div
+      v-if="machinesStore.machines.length === 0"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
+    >
+      <span style="font-size: 48px">🏋️</span>
+      <p class="font-bold text-gray-900 text-xl">No machines yet</p>
+      <button
+        class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white touch-manipulation"
+        :style="{ backgroundColor: palette.accent }"
+        @click="goToSettings"
+      >
+        Add in Settings →
+      </button>
+    </div>
+
     <!-- Session complete -->
     <div
-      v-if="remainingMachines.length === 0"
+      v-else-if="remainingMachines.length === 0"
       class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center"
     >
       <span style="font-size: 48px">🎉</span>
@@ -188,10 +220,16 @@ defineExpose({ isSwiping })
       <p class="text-gray-500 text-sm">
         {{ doneCount }} machines · {{ weightIncreaseCount }} weight increases
       </p>
+      <button
+        class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-100 text-gray-600 touch-manipulation"
+        @click="resetSession"
+      >
+        Restart session
+      </button>
     </div>
 
     <!-- Card stack -->
-    <template v-else>
+    <template v-else-if="remainingMachines.length > 0">
       <div
         v-for="(machine, index) in visibleMachines"
         :key="machine.id"

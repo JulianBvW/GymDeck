@@ -43,12 +43,12 @@ function goToSettings() {
           <span class="font-semibold tracking-widest text-[10px] text-gray-600 uppercase">Fitness</span>
           <div class="flex items-center gap-1">
             <button
-              class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full touch-manipulation"
+              class="w-11 h-11 flex items-center justify-center text-gray-500 rounded-full touch-manipulation"
               @click.stop="goToSettings"
             >
               <Settings :size="18" />
             </button>
-            <div class="w-9 h-9 flex items-center justify-center text-gray-500 rounded-full">
+            <div class="w-11 h-11 flex items-center justify-center text-gray-500 rounded-full">
               <ChevronDown :size="22" />
             </div>
           </div>
