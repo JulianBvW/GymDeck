@@ -73,16 +73,16 @@ const paths = computed(() =>
     <svg width="100%" height="100%" style="display: block; overflow: hidden">
       <defs>
         <linearGradient :id="`wg${uid}-0`" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" :stop-color="COLORS[0]" :stop-opacity="props.flip ? 0.15 : 0.45" />
-          <stop offset="100%" :stop-color="COLORS[0]" :stop-opacity="props.flip ? 0.45 : 0.15" />
+          <stop offset="0%" :stop-color="COLORS[0]" stop-opacity="0.45" />
+          <stop offset="100%" :stop-color="COLORS[0]" stop-opacity="0.15" />
         </linearGradient>
         <linearGradient :id="`wg${uid}-1`" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" :stop-color="COLORS[1]" :stop-opacity="props.flip ? 0.15 : 0.45" />
-          <stop offset="100%" :stop-color="COLORS[1]" :stop-opacity="props.flip ? 0.45 : 0.15" />
+          <stop offset="0%" :stop-color="COLORS[1]" stop-opacity="0.45" />
+          <stop offset="100%" :stop-color="COLORS[1]" stop-opacity="0.15" />
         </linearGradient>
         <linearGradient :id="`wg${uid}-2`" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" :stop-color="COLORS[2]" :stop-opacity="props.flip ? 0.15 : 0.45" />
-          <stop offset="100%" :stop-color="COLORS[2]" :stop-opacity="props.flip ? 0.45 : 0.15" />
+          <stop offset="0%" :stop-color="COLORS[2]" stop-opacity="0.45" />
+          <stop offset="100%" :stop-color="COLORS[2]" stop-opacity="0.15" />
         </linearGradient>
       </defs>
 
