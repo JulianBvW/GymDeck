@@ -65,11 +65,6 @@ function goToSettings() {
   router.push('/settings')
 }
 
-function resetSession() {
-  sessionsStore.clearTodaySession()
-  initCards()
-}
-
 onMounted(initCards)
 
 const visibleMachines = computed(() => {
@@ -216,7 +211,7 @@ defineExpose({ isSwiping })
       v-else-if="remainingMachines.length === 0"
       class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
     >
-      <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center">
+      <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center check-pop-in">
         <Check :size="28" :style="{ color: palette.accent }" />
       </div>
       <h2 class="font-bold text-gray-900 text-xl">Session complete</h2>
@@ -251,3 +246,13 @@ defineExpose({ isSwiping })
     </template>
   </div>
 </template>
+
+<style scoped>
+@keyframes checkPopIn {
+  0%   { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.check-pop-in {
+  animation: checkPopIn 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+</style>

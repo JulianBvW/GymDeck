@@ -154,17 +154,18 @@ onUnmounted(() => {
         <!-- Save + Delete -->
         <div class="flex gap-2">
           <button
-            class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors duration-150"
-            :class="isDirty ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
-            :style="isDirty ? { backgroundColor: palette.accent, filter: saving ? 'brightness(0.78)' : undefined } : undefined"
-            :disabled="!isDirty"
+            class="flex-1 py-2 rounded-xl text-sm font-semibold"
+            :class="saving ? 'save-flash' : isDirty ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+            :style="!saving && isDirty ? { backgroundColor: palette.accent } : undefined"
+            :disabled="!isDirty || saving"
             @click="save"
           >
             Save
           </button>
           <button
-            class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors duration-200"
-            :class="confirmingDelete ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-500'"
+            :key="confirmingDelete ? 'confirm' : 'idle'"
+            class="px-4 py-2 rounded-xl text-sm font-semibold"
+            :class="confirmingDelete ? 'delete-urgent bg-red-500 text-white' : 'bg-gray-100 text-gray-500'"
             @click="onDelete"
           >
             {{ confirmingDelete ? 'Confirm?' : 'Delete' }}
@@ -183,5 +184,22 @@ onUnmounted(() => {
 }
 .editor-body.is-open {
   max-height: 400px;
+}
+
+@keyframes saveFlashAnim {
+  0%   { background-color: #374151; color: white; }
+  100% { background-color: #e5e7eb; color: #9ca3af; }
+}
+.save-flash {
+  animation: saveFlashAnim 280ms ease-out forwards;
+}
+
+@keyframes deleteUrgentAnim {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239, 68, 68, 0.55); }
+  50%  { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239, 68, 68, 0); }
+}
+.delete-urgent {
+  animation: deleteUrgentAnim 420ms ease-out both;
 }
 </style>

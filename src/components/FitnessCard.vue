@@ -103,8 +103,16 @@ const todayLogged = computed(() =>
   fitnessStore.measurements.some(m => m.checkId === props.checkId && m.date === sessionsStore.today)
 )
 
+const pulseKey = ref(0)
+const pulseIsLock = ref(true)
+const btnBounceKey = ref(0)
+
 function confirm() {
-  if (todayLogged.value) {
+  const wasLogged = todayLogged.value
+  pulseIsLock.value = !wasLogged
+  pulseKey.value++
+  btnBounceKey.value++
+  if (wasLogged) {
     fitnessStore.removeLogEntry(props.checkId, sessionsStore.today)
   } else {
     fitnessStore.logMeasurement(props.checkId, sessionsStore.today, pickerValue.value)
@@ -117,17 +125,28 @@ function confirm() {
     <!-- Header: name + confirm button -->
     <div class="flex items-center justify-between">
       <p class="text-sm font-semibold text-gray-900">{{ check.name }}</p>
-      <button
-        class="w-8 h-8 flex items-center justify-center rounded-full border-2 transition-colors duration-150"
-        :style="{
-          borderColor: palette.accent,
-          backgroundColor: todayLogged ? palette.accent : 'transparent',
-          color: todayLogged ? '#ffffff' : palette.accent,
-        }"
-        @click="confirm"
-      >
-        <Check :size="15" />
-      </button>
+      <div class="relative">
+        <!-- Ring pulse: recreated on each tap to restart animation -->
+        <div
+          v-if="pulseKey > 0"
+          :key="pulseKey"
+          class="absolute inset-0 rounded-full pointer-events-none ring-pulse"
+          :style="{ '--ring-color': pulseIsLock ? palette.accent : '#d1d5db' }"
+        />
+        <button
+          :key="btnBounceKey"
+          class="w-8 h-8 flex items-center justify-center rounded-full border-2 transition-colors duration-150"
+          :class="{ 'btn-bounce': btnBounceKey > 0 }"
+          :style="{
+            borderColor: palette.accent,
+            backgroundColor: todayLogged ? palette.accent : 'transparent',
+            color: todayLogged ? '#ffffff' : palette.accent,
+          }"
+          @click="confirm"
+        >
+          <Check :size="15" />
+        </button>
+      </div>
     </div>
 
     <!-- Chart + picker -->
@@ -161,3 +180,24 @@ function confirm() {
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes ringPulse {
+  0%   { transform: scale(1);   opacity: 0.75; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.ring-pulse {
+  border: 2px solid var(--ring-color, currentColor);
+  animation: ringPulse 500ms ease-out forwards;
+}
+
+@keyframes btnBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.32); }
+  70%  { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
+.btn-bounce {
+  animation: btnBounce 300ms ease-out forwards;
+}
+</style>
