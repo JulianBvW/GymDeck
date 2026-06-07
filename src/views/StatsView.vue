@@ -38,7 +38,10 @@ function goBack() {
       :wave3="palette.wave3"
     />
 
-    <div class="relative z-10 flex-1 overflow-y-auto pt-4 pb-8 px-5 flex flex-col gap-6">
+    <div
+      class="relative z-10 flex-1 overflow-y-auto px-5 flex flex-col gap-6"
+      style="padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(2rem + env(safe-area-inset-bottom)); overscroll-behavior-y: contain"
+    >
       <!-- Header + page title -->
       <div class="flex flex-col gap-0 cursor-pointer touch-manipulation" @click="goBack">
         <div class="flex items-center justify-between">

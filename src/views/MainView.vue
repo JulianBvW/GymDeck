@@ -53,7 +53,10 @@ function onBottomZoneTap() {
     />
 
     <!-- Top bar -->
-    <div class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 py-4">
+    <div
+      class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 pb-4"
+      style="padding-top: calc(1rem + env(safe-area-inset-top))"
+    >
       <span class="text-sm font-medium text-gray-500">{{ doneCount }} / {{ totalCount }}</span>
       <div class="flex items-center gap-1">
         <button
