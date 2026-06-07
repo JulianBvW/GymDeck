@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
@@ -138,6 +138,29 @@ function cancelImport() {
   confirmingImport.value = false
   importError.value = null
 }
+
+const confirmingReset = ref(false)
+let resetTimer: ReturnType<typeof setTimeout> | null = null
+
+function onReset() {
+  if (!confirmingReset.value) {
+    confirmingReset.value = true
+    resetTimer = setTimeout(() => { confirmingReset.value = false }, 3000)
+  } else {
+    if (resetTimer !== null) clearTimeout(resetTimer)
+    machinesStore.machines = []
+    sessionsStore.sessions = []
+    sessionsStore.clearMachineOrder()
+    fitnessStore.checks = []
+    fitnessStore.measurements = []
+    confirmingReset.value = false
+    resetTimer = null
+  }
+}
+
+onUnmounted(() => {
+  if (resetTimer !== null) clearTimeout(resetTimer)
+})
 </script>
 
 <template>
@@ -253,6 +276,22 @@ function cancelImport() {
               </div>
             </div>
             <p v-if="importError" class="mt-2 text-xs text-red-500">{{ importError }}</p>
+          </div>
+
+          <!-- Reset row -->
+          <div class="border-t border-gray-100 px-4 py-3 flex items-center justify-between">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-semibold text-gray-900">Reset</span>
+              <span class="text-xs text-gray-400">Wipe all data permanently</span>
+            </div>
+            <button
+              :key="confirmingReset ? 'confirm' : 'idle'"
+              class="px-4 py-2 rounded-xl text-sm font-semibold touch-manipulation transition-colors duration-200"
+              :class="confirmingReset ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-500'"
+              @click="onReset"
+            >
+              {{ confirmingReset ? 'Confirm?' : 'Reset' }}
+            </button>
           </div>
         </div>
 
