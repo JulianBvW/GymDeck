@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { Check } from 'lucide-vue-next'
 import MachineCard from '@/components/MachineCard.vue'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
@@ -213,19 +214,18 @@ defineExpose({ isSwiping })
     <!-- Session complete -->
     <div
       v-else-if="remainingMachines.length === 0"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
     >
-      <span style="font-size: 48px">🎉</span>
-      <p class="font-bold text-gray-900 text-xl">All done!</p>
+      <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center">
+        <Check :size="28" :style="{ color: palette.accent }" />
+      </div>
+      <h2 class="font-bold text-gray-900 text-xl">Session complete</h2>
       <p class="text-gray-500 text-sm">
         {{ doneCount }} machines · {{ weightIncreaseCount }} weight increases
       </p>
-      <button
-        class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-100 text-gray-600 touch-manipulation"
-        @click="resetSession"
-      >
-        Restart session
-      </button>
+      <div class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-900 text-white">
+        Come back tomorrow
+      </div>
     </div>
 
     <!-- Card stack -->

@@ -71,9 +71,9 @@ const chartData = computed<ChartData<'line'>>(() => {
         return gradient
       },
       pointBackgroundColor: (context: ScriptableContext<'line'>): string =>
-        context.dataIndex === allPoints.length - 1 ? TODAY_COLOR : accent,
+        context.dataIndex === allPoints.length - 1 && !todayLogged.value ? TODAY_COLOR : accent,
       pointBorderColor: (context: ScriptableContext<'line'>): string =>
-        context.dataIndex === allPoints.length - 1 ? TODAY_COLOR : accent,
+        context.dataIndex === allPoints.length - 1 && !todayLogged.value ? TODAY_COLOR : accent,
       borderWidth: 2,
       tension: 0.4,
       pointRadius: 3,
