@@ -4,11 +4,17 @@ html, body, #app {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
-  background-color: #faf9f7;
 }
 
+/*
+ * Keep html/body transparent so iOS does not use the body background-color to
+ * paint an opaque fill over the home-indicator safe-area when
+ * apple-mobile-web-app-status-bar-style is "black-translucent".
+ * #app and every view root provide the cream background themselves.
+ */
 #app {
   position: relative;
+  background-color: #faf9f7;
 }
 
 /* Page slide transitions */
