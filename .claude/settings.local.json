@@ -11,7 +11,18 @@
       "Bash(source ~/.nvm/nvm.sh && ./node_modules/.bin/vue-tsc --noEmit)",
       "Bash(source ~/.nvm/nvm.sh && ./node_modules/.bin/vue-tsc --noEmit 2>&1)",
       "Bash(source ~/.nvm/nvm.sh && git diff --name-only HEAD && echo \"---\" && git status --short && echo \"---\" && git diff --stat HEAD)",
-      "Bash(source ~/.nvm/nvm.sh && git diff HEAD)"
+      "Bash(source ~/.nvm/nvm.sh && git diff HEAD)",
+      "Skill(deep-research)",
+      "WebFetch(domain:danielpietzsch.com)",
+      "WebFetch(domain:muffinman.io)",
+      "WebFetch(domain:benfrain.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.webdong.dev)",
+      "WebFetch(domain:blog.thomasdurand.fr)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:webkit.org)",
+      "WebFetch(domain:reverttosaved.com)",
+      "WebFetch(domain:www.freecodecamp.org)"
     ]
   }
 }
