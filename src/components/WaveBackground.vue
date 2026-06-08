@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, getCurrentInstance } from 'vue'
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useTransition, TransitionPresets } from '@vueuse/core'
 
 const props = defineProps<{
   progress: number
@@ -52,13 +52,18 @@ function buildWavePath(
   return d
 }
 
-
+// JS-based progress animation — CSS `transition: d` on SVG paths is unreliable in
+// iOS Safari when the parent <g> has a running CSS animation on transform.
+const animatedProgress = useTransition(computed(() => props.progress), {
+  duration: 600,
+  transition: TransitionPresets.easeInOut,
+})
 
 const baseY = computed(() => {
   const H = height.value
   return props.flip
-    ? props.progress * (H - 60) + 30
-    : (1 - props.progress) * (H - 60) + 30 * props.progress
+    ? animatedProgress.value * (H - 60) + 30
+    : (1 - animatedProgress.value) * (H - 60) + 30 * animatedProgress.value
 })
 
 const paths = computed(() =>
@@ -74,36 +79,32 @@ const paths = computed(() =>
       <defs>
         <linearGradient :id="`wg${uid}-0`" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" :stop-color="COLORS[0]" stop-opacity="0.45" />
-          <stop offset="100%" :stop-color="COLORS[0]" stop-opacity="0.15" />
+          <stop offset="100%" :stop-color="COLORS[0]" stop-opacity="0.35" />
         </linearGradient>
         <linearGradient :id="`wg${uid}-1`" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" :stop-color="COLORS[1]" stop-opacity="0.45" />
-          <stop offset="100%" :stop-color="COLORS[1]" stop-opacity="0.15" />
+          <stop offset="100%" :stop-color="COLORS[1]" stop-opacity="0.35" />
         </linearGradient>
         <linearGradient :id="`wg${uid}-2`" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" :stop-color="COLORS[2]" stop-opacity="0.45" />
-          <stop offset="100%" :stop-color="COLORS[2]" stop-opacity="0.15" />
+          <stop offset="100%" :stop-color="COLORS[2]" stop-opacity="0.35" />
         </linearGradient>
       </defs>
 
       <g class="wave-group-0">
-        <path class="wave-path" :d="paths[0]" :fill="`url(#wg${uid}-0)`" />
+        <path :d="paths[0]" :fill="`url(#wg${uid}-0)`" />
       </g>
       <g class="wave-group-1">
-        <path class="wave-path" :d="paths[1]" :fill="`url(#wg${uid}-1)`" />
+        <path :d="paths[1]" :fill="`url(#wg${uid}-1)`" />
       </g>
       <g class="wave-group-2">
-        <path class="wave-path" :d="paths[2]" :fill="`url(#wg${uid}-2)`" />
+        <path :d="paths[2]" :fill="`url(#wg${uid}-2)`" />
       </g>
     </svg>
   </div>
 </template>
 
 <style scoped>
-.wave-path {
-  transition: d 600ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes waveScroll460 {
   from { transform: translateX(0px); }
   to   { transform: translateX(-460px); }
