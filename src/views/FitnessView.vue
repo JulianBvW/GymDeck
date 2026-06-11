@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Plus } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
 import FitnessCard from '@/components/FitnessCard.vue'
 import { useUIStore } from '@/stores/ui'
@@ -15,6 +15,11 @@ const palette = useDailyPalette()
 function goBack() {
   uiStore.transitionDirection = 'up'
   router.push('/')
+}
+
+function goToSettings() {
+  uiStore.transitionDirection = 'right'
+  router.push('/settings')
 }
 </script>
 
@@ -43,8 +48,22 @@ function goBack() {
         <h1 class="-mt-2 text-2xl font-bold text-gray-900">Daily checks</h1>
       </div>
 
-      <!-- Fitness cards -->
-      <div class="flex flex-col gap-4">
+      <!-- Fitness cards / empty state -->
+      <div v-if="fitnessStore.checks.length === 0" class="flex flex-col items-center justify-center gap-3 text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center">
+          <Plus :size="28" :style="{ color: palette.wave1 }" />
+        </div>
+        <p class="font-bold text-gray-900 text-xl">No checks yet</p>
+        <p class="text-gray-500 text-sm">Add fitness checks in Settings</p>
+        <button
+          class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white touch-manipulation"
+          :style="{ backgroundColor: palette.wave1 }"
+          @click="goToSettings"
+        >
+          Add in Settings →
+        </button>
+      </div>
+      <div v-else class="flex flex-col gap-4">
         <FitnessCard v-for="check in fitnessStore.checks" :key="check.id" :check-id="check.id" />
       </div>
     </div>

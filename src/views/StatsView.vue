@@ -74,7 +74,7 @@ function goBack() {
       <WeekHeatmap />
 
       <!-- Per-machine weight charts -->
-      <div>
+      <div v-if="machinesStore.machines.length > 0">
         <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2 px-1">
           Weight evolution
         </p>

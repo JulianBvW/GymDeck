@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Check } from 'lucide-vue-next'
+import { Check, Plus } from 'lucide-vue-next'
 import MachineCard from '@/components/MachineCard.vue'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
@@ -48,7 +48,7 @@ function initCards() {
   } else {
     // Machines added after today's order was saved — append them at the end
     const savedSet = new Set(orderedIds)
-    const newIds = machinesStore.machines.filter(m => !savedSet.has(m.id)).map(m => m.id)
+    const newIds = machinesStore.machines.filter((m) => !savedSet.has(m.id)).map((m) => m.id)
     if (newIds.length > 0) {
       orderedIds = [...orderedIds, ...newIds]
       sessionsStore.saveTodayMachineOrder(orderedIds)
@@ -89,7 +89,9 @@ function cardWrapperStyle(index: number, machineId: string) {
       transformOrigin: 'top center',
       zIndex: peek1 ? 1 : index === 2 ? 0 : -1,
       pointerEvents: 'none' as const,
-      transition: returningFromLeft.value ? 'none' : 'transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+      transition: returningFromLeft.value
+        ? 'none'
+        : 'transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1)',
     }
   }
 
@@ -98,7 +100,12 @@ function cardWrapperStyle(index: number, machineId: string) {
   // which would otherwise discard the browser's remembered "from" value.
   if (machineId === promotingMachineId.value && index === 0) {
     if (promotingInStartPos.value) {
-      return { zIndex: 2, transform: 'translateY(36px) scale(0.93)', transformOrigin: 'top center' as const, transition: 'none' }
+      return {
+        zIndex: 2,
+        transform: 'translateY(36px) scale(0.93)',
+        transformOrigin: 'top center' as const,
+        transition: 'none',
+      }
     }
     return { zIndex: 2, transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)' }
   }
@@ -133,7 +140,11 @@ function removeTopCard() {
 function onDone() {
   const machine = remainingMachines.value[0]
   if (!machine) return
-  sessionsStore.logEntry({ machineId: machine.id, weight: machine.currentWeight, weightIncreased: false })
+  sessionsStore.logEntry({
+    machineId: machine.id,
+    weight: machine.currentWeight,
+    weightIncreased: false,
+  })
   removeTopCard()
 }
 
@@ -195,11 +206,13 @@ defineExpose({ isSwiping })
       v-if="machinesStore.machines.length === 0"
       class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
     >
-      <span style="font-size: 48px">🏋️</span>
+      <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center">
+        <Plus :size="28" :style="{ color: palette.wave1 }" />
+      </div>
       <p class="font-bold text-gray-900 text-xl">No machines yet</p>
       <button
         class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white touch-manipulation"
-        :style="{ backgroundColor: palette.accent }"
+        :style="{ backgroundColor: palette.wave1 }"
         @click="goToSettings"
       >
         Add in Settings →
@@ -211,7 +224,9 @@ defineExpose({ isSwiping })
       v-else-if="remainingMachines.length === 0"
       class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
     >
-      <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center check-pop-in">
+      <div
+        class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center check-pop-in"
+      >
         <Check :size="28" :style="{ color: palette.accent }" />
       </div>
       <h2 class="font-bold text-gray-900 text-xl">Session complete</h2>
@@ -249,8 +264,14 @@ defineExpose({ isSwiping })
 
 <style scoped>
 @keyframes checkPopIn {
-  0%   { transform: scale(0.3); opacity: 0; }
-  100% { transform: scale(1);   opacity: 1; }
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 .check-pop-in {
   animation: checkPopIn 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both;

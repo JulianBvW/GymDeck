@@ -76,7 +76,7 @@ const chartOptions: ChartOptions<'line'> = {
   <div class="bg-white rounded-2xl shadow-sm p-4">
     <p class="text-sm font-semibold text-gray-900 mb-3">{{ machineName }}</p>
     <div
-      v-if="points.length < 2"
+      v-if="points.length === 0"
       class="h-16 flex items-center justify-center text-sm text-gray-400"
     >
       Not enough data yet
