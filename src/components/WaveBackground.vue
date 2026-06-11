@@ -74,7 +74,7 @@ const paths = computed(() =>
 </script>
 
 <template>
-  <div ref="containerRef" class="absolute inset-0 pointer-events-none overflow-hidden">
+  <div ref="containerRef" class="absolute inset-0 pointer-events-none overflow-hidden" style="background-color: #faf9f7">
     <svg width="100%" height="100%" style="display: block; overflow: hidden">
       <defs>
         <linearGradient :id="`wg${uid}-0`" x1="0" y1="0" x2="0" y2="1">
