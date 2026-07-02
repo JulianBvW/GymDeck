@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance } from 'vue'
-import { useElementSize, useTransition, TransitionPresets } from '@vueuse/core'
+import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+import { useElementSize } from '@vueuse/core'
 
 const props = defineProps<{
   progress: number
@@ -25,6 +25,12 @@ const COLORS = computed(() => [props.wave1, props.wave2, props.wave3])
 
 const MAX_HALF_PERIODS = 12
 
+// Paths are built ONCE at the progress-0 position; progress changes translate
+// the whole wave group via a GPU-composited CSS transform (offsetY below).
+// Rebuilding path data per animation frame re-rasterized the SVG on the main
+// thread and dropped frames on iOS while card swipe animations ran concurrently.
+// The fill is extended one screen height past the closing edge so the vertical
+// translation never exposes a gap (container has overflow: hidden).
 function buildWavePath(
   H: number,
   amp: number,
@@ -38,7 +44,7 @@ function buildWavePath(
   const halfLen = len / 2
   const cp = halfLen * 0.5523  // cubic bezier magic number for sine approximation
 
-  const edge = flip ? 0 : H
+  const edge = flip ? -H : 2 * H
   let d = `M ${startX} ${edge} L ${startX} ${mid}`
 
   for (let i = 0; i < MAX_HALF_PERIODS; i++) {
@@ -52,25 +58,33 @@ function buildWavePath(
   return d
 }
 
-// JS-based progress animation — CSS `transition: d` on SVG paths is unreliable in
-// iOS Safari when the parent <g> has a running CSS animation on transform.
-const animatedProgress = useTransition(computed(() => props.progress), {
-  duration: 600,
-  transition: TransitionPresets.easeInOut,
-})
-
-const baseY = computed(() => {
-  const H = height.value
-  return props.flip
-    ? animatedProgress.value * (H - 60) + 30
-    : (1 - animatedProgress.value) * (H - 60) + 30 * animatedProgress.value
-})
+// Wave position at progress 0 — the fixed reference the paths are built at.
+const referenceBaseY = computed(() => (props.flip ? 30 : height.value - 60))
 
 const paths = computed(() =>
   LAYERS.map((layer) =>
-    buildWavePath(height.value, layer.amp, layer.len, baseY.value, layer.yOffset, props.flip ?? false),
+    buildWavePath(height.value, layer.amp, layer.len, referenceBaseY.value, layer.yOffset, props.flip ?? false),
   ),
 )
+
+// Vertical shift from the reference position for the current progress.
+// baseY(p) = flip ? p*(H-60) + 30 : (1-p)*(H-60) + 30p — offsetY is baseY(p) - baseY(0).
+const offsetY = computed(() => {
+  const H = height.value
+  return props.flip ? props.progress * (H - 60) : -props.progress * (H - 90)
+})
+
+// offsetY depends on the measured container height, which arrives async after
+// mount — suppress the transition until then so the wave doesn't visibly slide
+// into place on first render.
+const enableTransition = ref(false)
+onMounted(() => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      enableTransition.value = true
+    })
+  })
+})
 </script>
 
 <template>
@@ -91,14 +105,22 @@ const paths = computed(() =>
         </linearGradient>
       </defs>
 
-      <g class="wave-group-0">
-        <path :d="paths[0]" :fill="`url(#wg${uid}-0)`" />
-      </g>
-      <g class="wave-group-1">
-        <path :d="paths[1]" :fill="`url(#wg${uid}-1)`" />
-      </g>
-      <g class="wave-group-2">
-        <path :d="paths[2]" :fill="`url(#wg${uid}-2)`" />
+      <g
+        :style="{
+          transform: `translateY(${offsetY}px)`,
+          transition: enableTransition ? 'transform 600ms cubic-bezier(0.45, 0, 0.55, 1)' : 'none',
+          willChange: 'transform',
+        }"
+      >
+        <g class="wave-group-0">
+          <path :d="paths[0]" :fill="`url(#wg${uid}-0)`" />
+        </g>
+        <g class="wave-group-1">
+          <path :d="paths[1]" :fill="`url(#wg${uid}-1)`" />
+        </g>
+        <g class="wave-group-2">
+          <path :d="paths[2]" :fill="`url(#wg${uid}-2)`" />
+        </g>
       </g>
     </svg>
   </div>

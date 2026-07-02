@@ -18,9 +18,13 @@ const machine = computed(() => machinesStore.machines.find(m => m.id === props.m
 const expanded = ref(props.startOpen ?? false)
 watch(() => props.startOpen, (v) => { if (v) expanded.value = true })
 
+// A machine created via "Add machine" has an empty name until first saved —
+// its fields render empty with placeholders, and save falls back to the placeholder values.
+const isNew = computed(() => machine.value?.name === '')
+
 const localName = ref(machine.value?.name ?? '')
-const localWeight = ref(machine.value?.currentWeight ?? 0)
-const localStep = ref(machine.value?.stepSize ?? 2.5)
+const localWeight = ref<number | ''>(isNew.value ? '' : machine.value?.currentWeight ?? 0)
+const localStep = ref<number | ''>(isNew.value ? '' : machine.value?.stepSize ?? 2.5)
 const localX = ref(machine.value?.locationX ?? 0.5)
 const localY = ref(machine.value?.locationY ?? 0.5)
 
@@ -55,11 +59,17 @@ function onLocationUpdate(pos: { x: number; y: number }) {
 }
 
 function save() {
-  if (!machine.value || !isDirty.value) return
+  if (!machine.value || (!isDirty.value && !isNew.value)) return
   machinesStore.updateMachine(props.machineId, {
-    name: localName.value.trim() || machine.value.name,
-    currentWeight: Number.isFinite(localWeight.value) ? localWeight.value : machine.value.currentWeight,
-    stepSize: Number.isFinite(localStep.value) && localStep.value > 0 ? localStep.value : machine.value.stepSize,
+    name: localName.value.trim() || machine.value.name || 'New Machine',
+    currentWeight:
+      typeof localWeight.value === 'number' && Number.isFinite(localWeight.value)
+        ? localWeight.value
+        : machine.value.currentWeight,
+    stepSize:
+      typeof localStep.value === 'number' && Number.isFinite(localStep.value) && localStep.value > 0
+        ? localStep.value
+        : machine.value.stepSize,
     locationX: localX.value,
     locationY: localY.value,
   })
@@ -92,7 +102,7 @@ onUnmounted(() => {
       class="w-full flex items-center justify-between px-4 py-3 text-left touch-manipulation"
       @click="toggleExpand"
     >
-      <span class="text-sm font-semibold text-gray-900">{{ machine.name }}</span>
+      <span class="text-sm font-semibold text-gray-900">{{ machine.name || 'New Machine' }}</span>
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-400">{{ machine.currentWeight }} kg</span>
         <ChevronDown
@@ -119,7 +129,8 @@ onUnmounted(() => {
               <input
                 v-model="localName"
                 type="text"
-                class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+                placeholder="New Machine"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
               />
             </div>
             <div class="flex gap-2">
@@ -129,7 +140,8 @@ onUnmounted(() => {
                   v-model.number="localWeight"
                   type="number"
                   inputmode="decimal"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+                  placeholder="0"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div class="flex-1 flex flex-col gap-1">
@@ -138,7 +150,8 @@ onUnmounted(() => {
                   v-model.number="localStep"
                   type="number"
                   inputmode="decimal"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+                  placeholder="2.5"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
                 />
               </div>
             </div>
@@ -149,9 +162,9 @@ onUnmounted(() => {
         <div class="flex gap-2">
           <button
             class="flex-1 py-2 rounded-xl text-sm font-semibold"
-            :class="saving ? 'save-flash' : isDirty ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
-            :style="!saving && isDirty ? { backgroundColor: palette.accent } : undefined"
-            :disabled="!isDirty || saving"
+            :class="saving ? 'save-flash' : isDirty || isNew ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+            :style="!saving && (isDirty || isNew) ? { backgroundColor: palette.accent } : undefined"
+            :disabled="(!isDirty && !isNew) || saving"
             @click="save"
           >
             Save

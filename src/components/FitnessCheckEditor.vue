@@ -17,11 +17,15 @@ const check = computed(() => fitnessStore.checks.find(c => c.id === props.checkI
 const expanded = ref(props.startOpen ?? false)
 watch(() => props.startOpen, (v) => { if (v) expanded.value = true })
 
+// A check created via "Add check" has an empty name until first saved —
+// its fields render empty with placeholders, and save falls back to the placeholder values.
+const isNew = computed(() => check.value?.name === '')
+
 const localName = ref(check.value?.name ?? '')
 const localUnit = ref(check.value?.unit ?? '')
-const localStep = ref(check.value?.stepSize ?? 1)
-const localMin = ref(check.value?.min ?? 0)
-const localMax = ref(check.value?.max ?? 100)
+const localStep = ref<number | ''>(isNew.value ? '' : check.value?.stepSize ?? 1)
+const localMin = ref<number | ''>(isNew.value ? '' : check.value?.min ?? 0)
+const localMax = ref<number | ''>(isNew.value ? '' : check.value?.max ?? 100)
 
 const isDirty = computed(() =>
   check.value !== undefined && (
@@ -49,13 +53,16 @@ function toggleExpand() {
 }
 
 function save() {
-  if (!check.value || !isDirty.value) return
+  if (!check.value || (!isDirty.value && !isNew.value)) return
   fitnessStore.updateCheck(props.checkId, {
-    name: localName.value.trim() || check.value.name,
-    unit: localUnit.value.trim() || check.value.unit,
-    stepSize: Number.isFinite(localStep.value) && localStep.value > 0 ? localStep.value : check.value.stepSize,
-    min: Number.isFinite(localMin.value) ? localMin.value : check.value.min,
-    max: Number.isFinite(localMax.value) ? localMax.value : check.value.max,
+    name: localName.value.trim() || check.value.name || 'New Check',
+    unit: localUnit.value.trim() || check.value.unit || 'reps',
+    stepSize:
+      typeof localStep.value === 'number' && Number.isFinite(localStep.value) && localStep.value > 0
+        ? localStep.value
+        : check.value.stepSize,
+    min: typeof localMin.value === 'number' && Number.isFinite(localMin.value) ? localMin.value : check.value.min,
+    max: typeof localMax.value === 'number' && Number.isFinite(localMax.value) ? localMax.value : check.value.max,
   })
   saving.value = true
   setTimeout(() => {
@@ -86,7 +93,7 @@ onUnmounted(() => {
       class="w-full flex items-center justify-between px-4 py-3 text-left touch-manipulation"
       @click="toggleExpand"
     >
-      <span class="text-sm font-semibold text-gray-900">{{ check.name }}</span>
+      <span class="text-sm font-semibold text-gray-900">{{ check.name || 'New Check' }}</span>
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-400">{{ check.unit }}</span>
         <ChevronDown
@@ -107,7 +114,8 @@ onUnmounted(() => {
             <input
               v-model="localName"
               type="text"
-              class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+              placeholder="New Check"
+              class="border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div class="w-24 flex flex-col gap-1">
@@ -115,7 +123,8 @@ onUnmounted(() => {
             <input
               v-model="localUnit"
               type="text"
-              class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+              placeholder="reps"
+              class="border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
             />
           </div>
         </div>
@@ -128,7 +137,8 @@ onUnmounted(() => {
               v-model.number="localStep"
               type="number"
               inputmode="decimal"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+              placeholder="1"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div class="flex-1 flex flex-col gap-1">
@@ -137,7 +147,8 @@ onUnmounted(() => {
               v-model.number="localMin"
               type="number"
               inputmode="decimal"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+              placeholder="0"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
             />
           </div>
           <div class="flex-1 flex flex-col gap-1">
@@ -146,7 +157,8 @@ onUnmounted(() => {
               v-model.number="localMax"
               type="number"
               inputmode="decimal"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+              placeholder="100"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400"
             />
           </div>
         </div>
@@ -155,9 +167,9 @@ onUnmounted(() => {
         <div class="flex gap-2">
           <button
             class="flex-1 py-2 rounded-xl text-sm font-semibold"
-            :class="saving ? 'save-flash' : isDirty ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
-            :style="!saving && isDirty ? { backgroundColor: palette.accent } : undefined"
-            :disabled="!isDirty || saving"
+            :class="saving ? 'save-flash' : isDirty || isNew ? 'text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+            :style="!saving && (isDirty || isNew) ? { backgroundColor: palette.accent } : undefined"
+            :disabled="(!isDirty && !isNew) || saving"
             @click="save"
           >
             Save

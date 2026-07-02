@@ -35,9 +35,11 @@ function goBack() {
   router.back()
 }
 
+// Empty name marks the entry as "new" — the editor shows placeholders and
+// falls back to these defaults on save.
 function addMachine() {
   const id = machinesStore.addMachine({
-    name: 'New Machine',
+    name: '',
     locationX: 0.5,
     locationY: 0.5,
     currentWeight: 0,
@@ -47,7 +49,7 @@ function addMachine() {
 }
 
 function addCheck() {
-  const id = fitnessStore.addCheck({ name: 'New Check', unit: 'reps', stepSize: 1, min: 0, max: 100 })
+  const id = fitnessStore.addCheck({ name: '', unit: '', stepSize: 1, min: 0, max: 100 })
   newlyAddedCheckId.value = id
 }
 

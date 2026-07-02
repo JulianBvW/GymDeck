@@ -65,6 +65,11 @@ function goToSettings() {
   router.push('/settings')
 }
 
+function goToStats() {
+  uiStore.transitionDirection = 'up'
+  router.push('/stats')
+}
+
 onMounted(initCards)
 
 const visibleMachines = computed(() => {
@@ -233,9 +238,12 @@ defineExpose({ isSwiping })
       <p class="text-gray-500 text-sm">
         {{ doneCount }} machines · {{ weightIncreaseCount }} weight increases
       </p>
-      <div class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-900 text-white">
-        Come back tomorrow
-      </div>
+      <button
+        class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-900 text-white touch-manipulation"
+        @click="goToStats"
+      >
+        See statistics
+      </button>
     </div>
 
     <!-- Card stack -->
