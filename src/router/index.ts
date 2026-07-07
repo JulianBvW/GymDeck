@@ -10,4 +10,23 @@ const router = createRouter({
   ],
 })
 
+// After a new deploy, a still-open session runs the old index bundle whose lazy
+// chunk hashes no longer exist on the server — dynamic imports then fail and
+// navigation dies silently. Reload once to pick up the fresh bundle.
+router.onError((error, to) => {
+  const message = error instanceof Error ? error.message : String(error)
+  if (/error loading dynamically imported module|Failed to fetch dynamically imported module|Importing a module script failed/i.test(message)) {
+    const target = to.fullPath
+    const alreadyRetried = sessionStorage.getItem('chunk-reload') === target
+    if (!alreadyRetried) {
+      sessionStorage.setItem('chunk-reload', target)
+      window.location.assign(target)
+    }
+  }
+})
+
+router.afterEach(() => {
+  sessionStorage.removeItem('chunk-reload')
+})
+
 export default router
