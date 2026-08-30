@@ -17,18 +17,18 @@ const sessionsStore = useSessionsStore()
 const machinesStore = useMachinesStore()
 const palette = useDailyPalette()
 
-// The streak tile carries a dot: filled once this week has a session, hollow while
-// the grace week is still open. The other two tiles have nothing to indicate.
+// The streak tile carries a dot while the grace week is still open, and drops it
+// once a session is logged — a reminder that something is outstanding, not a reward
+// for having done it. The other two tiles have nothing to indicate.
 const stats = computed(() => [
   {
     value: sessionsStore.currentStreak,
     unit: sessionsStore.currentStreak === 1 ? 'week' : 'weeks',
     label: 'STREAK',
-    showDot: true,
-    dotFilled: sessionsStore.thisWeekDone,
+    showDot: !sessionsStore.thisWeekDone,
   },
-  { value: sessionsStore.totalSessions, unit: '/ 52w', label: 'SESSIONS', showDot: false, dotFilled: false },
-  { value: Math.round(machinesStore.totalWeight), unit: 'kg', label: 'VOLUME', showDot: false, dotFilled: false },
+  { value: sessionsStore.totalSessions, unit: '/ 52w', label: 'SESSIONS', showDot: false },
+  { value: Math.round(machinesStore.totalWeight), unit: 'kg', label: 'VOLUME', showDot: false },
 ])
 
 function goBack() {
@@ -76,13 +76,9 @@ function goBack() {
             <span
               v-if="stat.showDot"
               class="w-2 h-2 rounded-full shrink-0"
-              :style="
-                stat.dotFilled
-                  ? { backgroundColor: palette.accent }
-                  : { border: '1.5px solid #d1d5db' }
-              "
+              :style="{ backgroundColor: palette.accent }"
               role="img"
-              :aria-label="stat.dotFilled ? 'Trained this week' : 'No session this week yet'"
+              aria-label="No session this week yet"
             />
           </div>
           <div class="flex items-baseline gap-1">
