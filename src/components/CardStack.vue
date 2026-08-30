@@ -349,15 +349,15 @@ defineExpose({ isSwiping })
   }
 }
 .reveal {
-  animation: revealUp 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: revealUp 480ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 .reveal-1 {
-  animation-delay: 80ms;
+  animation-delay: 140ms;
 }
 .reveal-2 {
-  animation-delay: 160ms;
+  animation-delay: 280ms;
 }
 .reveal-3 {
-  animation-delay: 240ms;
+  animation-delay: 420ms;
 }
 </style>
