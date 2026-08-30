@@ -1,0 +1,14 @@
+# Normalise line endings: LF in the repository, LF in the working tree.
+# Without this, an editor on a fresh machine can silently rewrite files as
+# CRLF and every line shows up as changed in `git diff`.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.png  binary
+*.ico  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.woff  binary
+*.woff2 binary

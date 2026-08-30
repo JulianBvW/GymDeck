@@ -17,7 +17,7 @@
 
 - Strict mode is on. Never use `any`. Use type guards (`(x): x is T`) for array filters.
 - Array access (`arr[i]`) returns `T | undefined` in strict mode — use non-null assertion (`arr[i]!`) only when the index is provably in range, otherwise guard.
-- Run type checks with: `source ~/.nvm/nvm.sh && ./node_modules/.bin/vue-tsc --noEmit` — never append `2>&1`, it breaks the permission pattern match.
+- Run type checks with: `./node_modules/.bin/vue-tsc --noEmit` — never append `2>&1`, it breaks the permission pattern match.
 
 ## Tailwind / CSS
 
@@ -31,6 +31,7 @@
 
 ## Project-specific rules
 
-- Node 24 is required. Load it with `source ~/.nvm/nvm.sh` before any node/npx command in Bash.
+- Node 24 is required (see `.nvmrc`). It is managed by **fnm**, which puts the active version on `PATH` automatically — no `source` prefix is needed before node/npx commands.
+- Line endings are LF, enforced by `.gitattributes`. If a whole file suddenly shows as changed, check for CRLF before assuming the content differs.
 - `useDailyPalette()` returns a computed singleton — always call it at the top of `<script setup>`, never inside a function.
 - Machine order is persisted as `{ date, order: string[] }` in localStorage — IDs only, not objects. Map back to Machine objects on mount so deleted machines are handled gracefully.
