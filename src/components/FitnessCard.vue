@@ -7,6 +7,7 @@ import DrumRollPicker from '@/components/DrumRollPicker.vue'
 import { useFitnessStore } from '@/stores/fitness'
 import { useSessionsStore } from '@/stores/sessions'
 import { useDailyPalette } from '@/composables/useDailyPalette'
+import { formatDayMonth } from '@/utils/date'
 
 const props = defineProps<{ checkId: string }>()
 
@@ -35,12 +36,7 @@ const historicalPoints = computed(() =>
     .filter(m => m.checkId === props.checkId && m.date !== sessionsStore.today)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-20)
-    .map(m => {
-      const parts = m.date.slice(5).split('-')
-      const month = parts[0] ?? ''
-      const day = parts[1] ?? ''
-      return { x: `${day}.${month}.`, y: m.value }
-    })
+    .map(m => ({ x: formatDayMonth(m.date), y: m.value }))
 )
 
 function hexToRgba(hex: string, alpha: number): string {

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Line } from 'vue-chartjs'
 import type { ChartData, ChartOptions, ScriptableContext } from 'chart.js'
 import { useSessionsStore } from '@/stores/sessions'
+import { formatDayMonth } from '@/utils/date'
 
 const props = defineProps<{
   machineId: string
@@ -19,11 +20,7 @@ const points = computed(() =>
     .sort((a, b) => a.date.localeCompare(b.date))
     .map(s => {
       const entry = s.machinesDone.find(e => e.machineId === props.machineId)!
-      // Format date as German "DD.MM."
-      const parts = s.date.slice(5).split('-')
-      const month = parts[0] ?? ''
-      const day = parts[1] ?? ''
-      return { x: `${day}.${month}.`, y: entry.weight }
+      return { x: formatDayMonth(s.date), y: entry.weight }
     })
 )
 
