@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
+import { useLocalStorage, StorageSerializers } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { toDateString, startOfWeek } from '@/utils/date'
 
@@ -18,7 +18,14 @@ export interface Session {
 
 export const useSessionsStore = defineStore('sessions', () => {
   const sessions = useLocalStorage<Session[]>('gymdeck-sessions', [])
-  const machineOrderStorage = useLocalStorage<{ date: string; order: string[] } | null>('gymdeck-machine-order', null)
+  // The explicit serializer is required: useLocalStorage guesses the serializer from
+  // the default value, and a `null` default guesses "any", whose writer is String(v).
+  // That stored the literal "[object Object]", so the order never survived a reload.
+  const machineOrderStorage = useLocalStorage<{ date: string; order: string[] } | null>(
+    'gymdeck-machine-order',
+    null,
+    { serializer: StorageSerializers.object },
+  )
 
   const todayMachineOrder = computed<string[] | null>(() => {
     const stored = machineOrderStorage.value
