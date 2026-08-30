@@ -62,22 +62,28 @@ export const useSessionsStore = defineStore('sessions', () => {
     sessions.value.filter(s => s.machinesDone.length >= 1).length
   )
 
-  // Streak = consecutive weeks (ending this week) with at least one valid session
+  const validWeeks = computed(() => new Set(
+    sessions.value
+      .filter(s => s.machinesDone.length >= 1)
+      .map(s => startOfWeek(s.date))
+  ))
+
+  /** True once this week has at least one valid session — the streak is banked. */
+  const thisWeekDone = computed(() =>
+    validWeeks.value.has(startOfWeek(today.value))
+  )
+
+  // Streak = consecutive weeks with at least one valid session. The in-progress
+  // week is a grace period: until it has a session it neither counts towards the
+  // streak nor breaks it, so a long run does not read as 0 every Monday morning.
   const currentStreak = computed(() => {
-    const validDates = new Set(
-      sessions.value
-        .filter(s => s.machinesDone.length >= 1)
-        .map(s => startOfWeek(s.date))
-    )
+    const weekCursor = new Date(startOfWeek(today.value) + 'T00:00:00')
+    if (!thisWeekDone.value) {
+      weekCursor.setDate(weekCursor.getDate() - 7)
+    }
 
     let streak = 0
-    const now = new Date()
-    const thisWeek = startOfWeek(toDateString(now))
-
-    const weekCursor = new Date(thisWeek + 'T00:00:00')
-    while (true) {
-      const weekStr = toDateString(weekCursor)
-      if (!validDates.has(weekStr)) break
+    while (validWeeks.value.has(toDateString(weekCursor))) {
       streak++
       weekCursor.setDate(weekCursor.getDate() - 7)
     }
@@ -105,5 +111,5 @@ export const useSessionsStore = defineStore('sessions', () => {
     deckStorage.value = null
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
+  return { sessions, today, todaySession, totalSessions, currentStreak, thisWeekDone, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
 })

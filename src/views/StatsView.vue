@@ -16,10 +16,18 @@ const sessionsStore = useSessionsStore()
 const machinesStore = useMachinesStore()
 const palette = useDailyPalette()
 
+// The streak tile carries a dot: filled once this week has a session, hollow while
+// the grace week is still open. The other two tiles have nothing to indicate.
 const stats = computed(() => [
-  { value: sessionsStore.currentStreak, unit: 'weeks', label: 'STREAK' },
-  { value: sessionsStore.totalSessions, unit: '/ 52w', label: 'SESSIONS' },
-  { value: Math.round(machinesStore.totalWeight), unit: 'kg', label: 'VOLUME' },
+  {
+    value: sessionsStore.currentStreak,
+    unit: sessionsStore.currentStreak === 1 ? 'week' : 'weeks',
+    label: 'STREAK',
+    showDot: true,
+    dotFilled: sessionsStore.thisWeekDone,
+  },
+  { value: sessionsStore.totalSessions, unit: '/ 52w', label: 'SESSIONS', showDot: false, dotFilled: false },
+  { value: Math.round(machinesStore.totalWeight), unit: 'kg', label: 'VOLUME', showDot: false, dotFilled: false },
 ])
 
 function goBack() {
@@ -60,9 +68,22 @@ function goBack() {
           :key="stat.label"
           class="flex-1 bg-white rounded-2xl shadow-sm px-4 py-3 flex flex-col gap-1"
         >
-          <span class="text-[10px] font-semibold tracking-widest text-gray-400">{{
-            stat.label
-          }}</span>
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[10px] font-semibold tracking-widest text-gray-400">{{
+              stat.label
+            }}</span>
+            <span
+              v-if="stat.showDot"
+              class="w-2 h-2 rounded-full shrink-0"
+              :style="
+                stat.dotFilled
+                  ? { backgroundColor: palette.accent }
+                  : { border: '1.5px solid #d1d5db' }
+              "
+              role="img"
+              :aria-label="stat.dotFilled ? 'Trained this week' : 'No session this week yet'"
+            />
+          </div>
           <div class="flex items-baseline gap-1">
             <span class="text-2xl font-bold text-gray-900">{{ stat.value }}</span>
             <span class="text-sm text-gray-400">{{ stat.unit }}</span>
