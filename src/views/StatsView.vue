@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-vue-next'
 import WaveBackground from '@/components/WaveBackground.vue'
 import WeekHeatmap from '@/components/WeekHeatmap.vue'
 import WeightChart from '@/components/WeightChart.vue'
+import SessionLog from '@/components/SessionLog.vue'
 import { useUIStore } from '@/stores/ui'
 import { useSessionsStore } from '@/stores/sessions'
 import { useMachinesStore } from '@/stores/machines'
@@ -108,6 +109,9 @@ function goBack() {
           />
         </div>
       </div>
+
+      <!-- Training log -->
+      <SessionLog />
     </div>
   </div>
 </template>

@@ -121,5 +121,5 @@ export const useSessionsStore = defineStore('sessions', () => {
     deckStorage.value = null
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, thisWeekDone, sessionsPerWeek, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
+  return { sessions, today, todaySession, validSessions, totalSessions, currentStreak, thisWeekDone, sessionsPerWeek, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
 })

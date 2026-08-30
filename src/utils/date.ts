@@ -6,6 +6,11 @@ export function toDateString(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
+/** Format a stored "YYYY-MM-DD" for display as German "DD.MM." — no year. */
+export function formatDayMonth(dateStr: string): string {
+  return dateStr.slice(8, 10) + '.' + dateStr.slice(5, 7) + '.'
+}
+
 /** Return the Monday of the week containing dateStr ("YYYY-MM-DD"), in local time. */
 export function startOfWeek(dateStr: string): string {
   // Parse as local midnight — bare "YYYY-MM-DD" is treated as UTC by the spec
