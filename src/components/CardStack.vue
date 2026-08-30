@@ -40,6 +40,7 @@ function initCards() {
   const doneMachineIds = new Set(
     sessionsStore.todaySession?.machinesDone.map((e) => e.machineId) ?? [],
   )
+  const skippedMachineIds = new Set(sessionsStore.todaySkipped)
   // Reuse today's order if it exists; otherwise shuffle once and persist
   let orderedIds = sessionsStore.todayMachineOrder
   if (!orderedIds) {
@@ -57,7 +58,7 @@ function initCards() {
   remainingMachines.value = orderedIds
     .map((id) => machinesStore.machines.find((m) => m.id === id))
     .filter((m): m is Machine => m !== undefined)
-    .filter((m) => !doneMachineIds.has(m.id))
+    .filter((m) => !doneMachineIds.has(m.id) && !skippedMachineIds.has(m.id))
 }
 
 function goToSettings() {
@@ -192,6 +193,9 @@ async function onLater() {
 }
 
 function onSkip() {
+  const machine = remainingMachines.value[0]
+  if (!machine) return
+  sessionsStore.skipMachineToday(machine.id)
   removeTopCard()
 }
 

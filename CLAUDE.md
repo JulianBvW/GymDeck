@@ -34,4 +34,4 @@
 - Node 24 is required (see `.nvmrc`). It is managed by **fnm**, which puts the active version on `PATH` automatically — no `source` prefix is needed before node/npx commands.
 - Line endings are LF, enforced by `.gitattributes`. If a whole file suddenly shows as changed, check for CRLF before assuming the content differs.
 - `useDailyPalette()` returns a computed singleton — always call it at the top of `<script setup>`, never inside a function.
-- Machine order is persisted as `{ date, order: string[] }` in localStorage — IDs only, not objects. Map back to Machine objects on mount so deleted machines are handled gracefully.
+- Today's deck is persisted as `{ date, order: string[], skipped?: string[] }` in localStorage — IDs only, not objects. Map back to Machine objects on mount so deleted machines are handled gracefully. `skipped` is optional on read because decks saved before it existed lack the field; anything rewriting the deck must preserve it.

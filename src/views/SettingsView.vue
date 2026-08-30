@@ -23,8 +23,14 @@ const fitnessStore = useFitnessStore()
 const palette = useDailyPalette()
 
 const doneCount = computed(() => sessionsStore.todaySession?.machinesDone.length ?? 0)
+// Same denominator as MainView — skipped machines are out of today's deck, so the
+// waves keep the same height when navigating between the two screens.
+const totalCount = computed(() => {
+  const skipped = new Set(sessionsStore.todaySkipped)
+  return machinesStore.machines.filter((m) => !skipped.has(m.id)).length
+})
 const progress = computed(() =>
-  machinesStore.machines.length === 0 ? 0 : doneCount.value / machinesStore.machines.length
+  totalCount.value === 0 ? 0 : doneCount.value / totalCount.value
 )
 
 const newlyAddedMachineId = ref<string | null>(null)

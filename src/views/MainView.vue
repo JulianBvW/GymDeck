@@ -19,7 +19,14 @@ const cardStackRef = ref()
 const isSwiping = computed<boolean>(() => cardStackRef.value?.isSwiping?.value ?? false)
 
 const doneCount = computed(() => sessionsStore.todaySession?.machinesDone.length ?? 0)
-const totalCount = computed(() => machinesStore.machines.length)
+
+// Skipped machines leave today's deck entirely, so they must leave the denominator
+// too — otherwise a skip would make it impossible to reach a full screen of waves.
+// Filtering against the machine list drops ids of machines deleted since the skip.
+const totalCount = computed(() => {
+  const skipped = new Set(sessionsStore.todaySkipped)
+  return machinesStore.machines.filter((m) => !skipped.has(m.id)).length
+})
 
 const progress = computed(() => {
   if (totalCount.value === 0) return 0

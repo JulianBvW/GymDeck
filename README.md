@@ -33,11 +33,13 @@ Each card is one machine, showing its current working weight. Three ways to clea
 - **Later** (swipe left) — sends the card to the back of the deck. Disabled on the last card.
 
 There is also a skip button in the card's top-right corner, which drops the machine from
-today's deck without logging it.
+today's deck without logging it. A skipped machine also leaves the progress count, so
+skipping two of ten still lets the waves fill the screen.
 
-The deck order is shuffled once per day and persisted as `{ date, order: string[] }`, so
-closing and reopening the app mid-session resumes exactly where you left off rather than
-reshuffling. Machines added after that shuffle get appended to the end.
+The deck is shuffled once per day and persisted as `{ date, order: string[], skipped: string[] }`,
+so closing and reopening the app mid-session — or ducking into Settings — resumes exactly
+where you left off rather than reshuffling or resurrecting skipped machines. Machines added
+after that shuffle get appended to the end.
 
 ## Look and feel
 

@@ -18,22 +18,38 @@ export interface Session {
 
 export const useSessionsStore = defineStore('sessions', () => {
   const sessions = useLocalStorage<Session[]>('gymdeck-sessions', [])
+  // Today's deck: the shuffled order plus the machines skipped out of it.
+  // `skipped` is optional on read — decks persisted before it existed lack the field.
   // The explicit serializer is required: useLocalStorage guesses the serializer from
   // the default value, and a `null` default guesses "any", whose writer is String(v).
-  // That stored the literal "[object Object]", so the order never survived a reload.
-  const machineOrderStorage = useLocalStorage<{ date: string; order: string[] } | null>(
+  const deckStorage = useLocalStorage<{ date: string; order: string[]; skipped?: string[] } | null>(
     'gymdeck-machine-order',
     null,
     { serializer: StorageSerializers.object },
   )
 
-  const todayMachineOrder = computed<string[] | null>(() => {
-    const stored = machineOrderStorage.value
-    return stored?.date === toDateString(new Date()) ? stored.order : null
+  const todayDeck = computed(() => {
+    const stored = deckStorage.value
+    return stored?.date === toDateString(new Date()) ? stored : null
   })
 
+  const todayMachineOrder = computed<string[] | null>(() => todayDeck.value?.order ?? null)
+  const todaySkipped = computed<string[]>(() => todayDeck.value?.skipped ?? [])
+
+  // Rewrites the order while preserving today's skips. On a new day `todaySkipped`
+  // is already empty, so the fresh deck starts unskipped.
   function saveTodayMachineOrder(order: string[]) {
-    machineOrderStorage.value = { date: toDateString(new Date()), order }
+    deckStorage.value = { date: toDateString(new Date()), order, skipped: todaySkipped.value }
+  }
+
+  function skipMachineToday(machineId: string) {
+    const deck = todayDeck.value
+    if (!deck || todaySkipped.value.includes(machineId)) return
+    deckStorage.value = {
+      date: deck.date,
+      order: deck.order,
+      skipped: [...todaySkipped.value, machineId],
+    }
   }
 
   const today = computed(() => toDateString(new Date()))
@@ -86,8 +102,8 @@ export const useSessionsStore = defineStore('sessions', () => {
   }
 
   function clearMachineOrder() {
-    machineOrderStorage.value = null
+    deckStorage.value = null
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, saveTodayMachineOrder, clearMachineOrder, startSessionIfNeeded, logEntry }
+  return { sessions, today, todaySession, totalSessions, currentStreak, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
 })
