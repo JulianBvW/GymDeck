@@ -92,21 +92,28 @@ const PARTICLES = [
   animation: glowPulse 1000ms ease-out forwards;
 }
 
-/* Thrown out from the origin, then pulled straight back in. `both` keeps each dot
-   hidden during its stagger delay — with `forwards` alone it sits visible at the
-   origin until its turn. */
+/* Thrown out from the origin, then drawn straight up and out of frame — the dots keep
+   their x and never fade while visible. They leave the picture by being clipped at the
+   top edge (MainView's root is overflow-hidden), which is what makes them read as being
+   pulled away rather than snapping back.
+   The per-keyframe timing functions matter: ease-out for the burst so it snaps outward,
+   ease-in for the exit so it accelerates away.
+   `both` keeps each dot hidden during its stagger delay — with `forwards` alone it sits
+   visible at the origin until its turn. */
 @keyframes particleBurst {
   0% {
     transform: translate(0, 0) scale(0.3);
     opacity: 0;
+    animation-timing-function: ease-out;
   }
-  35% {
+  30% {
     transform: translate(var(--dx), var(--dy)) scale(1);
     opacity: 1;
+    animation-timing-function: ease-in;
   }
   100% {
-    transform: translate(0, 0) scale(0.3);
-    opacity: 0;
+    transform: translate(var(--dx), -80px) scale(0.85);
+    opacity: 1;
   }
 }
 .particle {
@@ -114,6 +121,6 @@ const PARTICLES = [
   top: 0;
   left: 50%;
   border-radius: 50%;
-  animation: particleBurst 900ms ease-out both;
+  animation: particleBurst 1100ms both;
 }
 </style>
