@@ -21,21 +21,16 @@ function weeksOfYear(year: number): string[] {
 
 const weeks = computed(() => weeksOfYear(new Date().getFullYear()))
 
-const sessionWeeks = computed(() => {
-  const set = new Set<string>()
-  sessionsStore.sessions
-    .filter(s => s.machinesDone.length >= 1)
-    .forEach(s => set.add(startOfWeek(s.date)))
-  return set
-})
-
 const thisWeek = computed(() => startOfWeek(toDateString(new Date())))
 
-type WeekState = 'done' | 'missed' | 'future'
+type WeekState = 'none' | 'one' | 'two' | 'future'
 
+// Threshold is >= 2, not === 2, so a three-session week does not fall back to
+// looking like a single one.
 function weekState(weekStart: string): WeekState {
   if (weekStart > thisWeek.value) return 'future'
-  return sessionWeeks.value.has(weekStart) ? 'done' : 'missed'
+  const count = sessionsStore.sessionsPerWeek.get(weekStart) ?? 0
+  return count >= 2 ? 'two' : count === 1 ? 'one' : 'none'
 }
 
 const quarters = computed(() => {
@@ -63,16 +58,20 @@ const quarters = computed(() => {
             v-for="w in q.weeks"
             :key="w.weekStart"
             class="aspect-square rounded-sm"
-            :class="{ 'border border-dashed border-gray-300': w.state === 'future' }"
-            :style="{
-              backgroundColor:
-                w.state === 'done'   ? '#1a1a1a' :
-                w.state === 'future' ? '#f5f5f5' :
-                '#e0e0e0',
-            }"
+            :class="'week-' + w.state"
           />
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* One session fills the cell half, two or more fill it completely — the cell
+   doubles as a progress meter for the week. All four fills are constants, so
+   they belong in CSS rather than an inline :style binding. */
+.week-none   { background: #e0e0e0; }
+.week-one    { background: linear-gradient(to top, #1a1a1a 50%, #e0e0e0 50%); }
+.week-two    { background: #1a1a1a; }
+.week-future { background: #f5f5f5; border: 1px dashed #d1d5db; }
+</style>

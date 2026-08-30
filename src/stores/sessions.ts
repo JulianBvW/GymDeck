@@ -58,19 +58,29 @@ export const useSessionsStore = defineStore('sessions', () => {
     sessions.value.find(s => s.date === today.value) ?? null
   )
 
-  const totalSessions = computed(() =>
-    sessions.value.filter(s => s.machinesDone.length >= 1).length
+  /** Sessions that actually count: at least one machine logged. */
+  const validSessions = computed(() =>
+    sessions.value.filter(s => s.machinesDone.length >= 1)
   )
 
-  const validWeeks = computed(() => new Set(
-    sessions.value
-      .filter(s => s.machinesDone.length >= 1)
-      .map(s => startOfWeek(s.date))
-  ))
+  const totalSessions = computed(() => validSessions.value.length)
+
+  /**
+   * Valid sessions per calendar week, keyed by the week's Monday.
+   * Weeks without a session are absent, so `.has()` reads like the Set this replaces.
+   */
+  const sessionsPerWeek = computed(() => {
+    const counts = new Map<string, number>()
+    for (const session of validSessions.value) {
+      const week = startOfWeek(session.date)
+      counts.set(week, (counts.get(week) ?? 0) + 1)
+    }
+    return counts
+  })
 
   /** True once this week has at least one valid session — the streak is banked. */
   const thisWeekDone = computed(() =>
-    validWeeks.value.has(startOfWeek(today.value))
+    sessionsPerWeek.value.has(startOfWeek(today.value))
   )
 
   // Streak = consecutive weeks with at least one valid session. The in-progress
@@ -83,7 +93,7 @@ export const useSessionsStore = defineStore('sessions', () => {
     }
 
     let streak = 0
-    while (validWeeks.value.has(toDateString(weekCursor))) {
+    while (sessionsPerWeek.value.has(toDateString(weekCursor))) {
       streak++
       weekCursor.setDate(weekCursor.getDate() - 7)
     }
@@ -111,5 +121,5 @@ export const useSessionsStore = defineStore('sessions', () => {
     deckStorage.value = null
   }
 
-  return { sessions, today, todaySession, totalSessions, currentStreak, thisWeekDone, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
+  return { sessions, today, todaySession, totalSessions, currentStreak, thisWeekDone, sessionsPerWeek, todayMachineOrder, todaySkipped, saveTodayMachineOrder, skipMachineToday, clearMachineOrder, startSessionIfNeeded, logEntry }
 })
