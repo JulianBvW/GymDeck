@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GymDeck — Streak-Punkt: Füllung & Ausrichtung</title>
+<style>
+  /* Kachel 1:1 aus StatsView.vue:
+       Karte    bg-white rounded-2xl shadow-sm px-4 py-3 flex flex-col gap-1
+       Label    text-[10px] font-semibold tracking-widest text-gray-400
+                -> Tailwind v4 emittiert NUR font-size:10px, keine line-height!
+                   Der Span erbt 1.5 vom Body => Zeilenbox 15px.
+       Wert     text-2xl font-bold text-gray-900 + text-sm text-gray-400 (baseline)
+       Reihe    flex gap-3
+  */
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 28px 16px 80px;
+    background: #e6e4e1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;                 /* Tailwind-Preflight — entscheidend für die Geometrie */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .device-caption {
+    width: 375px; margin: 0 auto 10px;
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(0,0,0,.38); text-align: center;
+  }
+  .phone {
+    width: 375px; margin: 0 auto; background: #faf9f7;
+    border-radius: 44px; padding: 34px 20px 44px;
+    box-shadow: 0 22px 50px rgba(14,15,20,.14), 0 3px 10px rgba(14,15,20,.06);
+    color: #1a1a1a;
+  }
+
+  h1 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 6px; }
+  h2 { font-size: 14px; font-weight: 700; margin: 30px 0 4px; }
+  .lede, .desc { font-size: 12.5px; line-height: 1.55; color: rgba(0,0,0,.55); margin: 0 0 16px; }
+  .desc { margin: 0 0 10px; }
+  .note {
+    font-size: 11px; line-height: 1.5; color: rgba(0,0,0,.42);
+    margin: 8px 0 0; padding-left: 9px; border-left: 2px solid rgba(14,15,20,.09);
+  }
+  .caption {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(0,0,0,.35); margin: 0 0 6px;
+  }
+
+  .palettes { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 22px; }
+  .pal {
+    border: 0; padding: 6px 9px; border-radius: 10px; cursor: pointer;
+    font-size: 10.5px; font-weight: 600; font-family: inherit;
+    background: rgba(14,15,20,.05); color: rgba(0,0,0,.55);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pal.active { background: #1a1a1a; color: #fff; }
+  .pal i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+  /* --- die Kachel --- */
+  .row { display: flex; gap: 12px; }
+  .tile {
+    flex: 1; background: #fff; border-radius: 16px;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0/.05);
+    padding: 12px 16px; display: flex; flex-direction: column; gap: 4px;
+    position: relative;
+  }
+  .label-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    color: #9ca3af; text-transform: uppercase;
+  }
+  .value-row { display: flex; align-items: baseline; gap: 4px; }
+  .value { font-size: 24px; line-height: 32px; font-weight: 700; color: #111827; }
+  .unit  { font-size: 14px; line-height: 20px; color: #9ca3af; }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; position: relative; }
+
+  /* Zustand "diese Woche noch nichts" — in allen Varianten gleich */
+  .dot.open { border: 1.5px solid #d1d5db; }
+
+  /* Füll-Varianten für "diese Woche erledigt" */
+  .f-accent .dot.done { background: var(--accent); }
+  .f-ink    .dot.done { background: #1a1a1a; }
+  .f-ring   .dot.done { background: var(--accent); box-shadow: 0 0 0 1.5px #1a1a1a; }
+  .f-gone   .dot.done { display: none; }
+
+  /* Umgekehrte Lesart: der Punkt ist die offene Erinnerung, nicht die Belohnung.
+     "erledigt" ist dann schlicht kein Punkt. */
+  .f-pending     .dot.open { border: 0; background: var(--accent); }
+  .f-pending     .dot.done { display: none; }
+  .f-pending-ink .dot.open { border: 0; background: #1a1a1a; }
+  .f-pending-ink .dot.done { display: none; }
+
+  /* Ausrichtungs-Offsets */
+  .o-0    .dot { top: 0; }
+  .o-05   .dot { top: -.5px; }
+  .o-1    .dot { top: -1px; }
+  .o-15   .dot { top: -1.5px; }
+  .o-2    .dot { top: -2px; }
+
+  /* Hilfslinie exakt durch die Punktmitte, quer über das Label */
+  .guide .label-row { position: relative; }
+  .guide .label-row::after {
+    content: ""; position: absolute; left: 0; right: 0;
+    top: calc(50% + var(--off, 0px)); height: 1px;
+    background: rgba(220, 38, 38, .55); pointer-events: none;
+  }
+
+  .variant { margin-bottom: 22px; }
+  .pair { display: flex; gap: 12px; align-items: flex-start; }
+  .pair > div { flex: 1; }
+  .pair .caption { text-align: center; }
+
+  .verdict {
+    background: #fff; border-radius: 16px; padding: 16px; margin-top: 26px;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0/.05);
+    font-size: 12px; line-height: 1.6; color: rgba(0,0,0,.62);
+  }
+  .verdict h3 { font-size: 12.5px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px; }
+  .verdict ul { margin: 0; padding-left: 16px; }
+  .verdict li { margin-bottom: 6px; }
+  .verdict strong { color: #1a1a1a; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 11px; }
+  th, td { text-align: left; padding: 3px 6px 3px 0; }
+  th { color: rgba(0,0,0,.4); font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<p class="device-caption">iPhone 13 mini · 375 px</p>
+
+<div class="phone">
+  <h1>Streak-Punkt</h1>
+  <p class="lede">
+    Zwei getrennte Fragen: <strong>wie „erledigt“ aussehen soll</strong> und
+    <strong>wo der Punkt vertikal sitzt</strong>. Kachel, Schriftgrößen und Abstände sind
+    1:1 aus <code>StatsView.vue</code>, inklusive der geerbten
+    <code>line-height: 1.5</code> — die bestimmt die Geometrie mit.
+  </p>
+
+  <div class="palettes" id="palettes"></div>
+
+  <h2>A · Wie soll „diese Woche erledigt“ aussehen?</h2>
+  <p class="desc">
+    Links jeweils der Ist-Zustand (noch nichts diese Woche), rechts nach der ersten Session.
+    Schalte oben die Palette um — genau da fällt Variante 1 auseinander.
+  </p>
+  <div id="fills"></div>
+
+  <h2>B · Vertikale Ausrichtung</h2>
+  <p class="desc">
+    Die rote Linie liegt exakt in der Punktmitte. Gesucht ist der Offset, bei dem sie die
+    Versalien von <em>STREAK</em> optisch halbiert.
+  </p>
+  <div id="offsets"></div>
+
+  <div class="verdict">
+    <h3>Kontrast gegen die weiße Karte</h3>
+    <table id="contrast"></table>
+    <p class="note" style="margin-top:10px">
+      Der hohle Ring liegt bei 1.47:1. Alles, was dem nahe kommt, ist als Zustandswechsel
+      nicht wahrnehmbar — und Ocean und Slate sind sogar <em>blasser</em> als der Ring,
+      also genau verkehrt herum.
+    </p>
+  </div>
+</div>
+
+<script>
+const PALETTES = [
+  { name:'Ocean', accent:'#ade8f4' }, { name:'Sunset', accent:'#ffd6a5' },
+  { name:'Forest', accent:'#b7e4c7' }, { name:'Lavender', accent:'#e0aaff' },
+  { name:'Rose', accent:'#ffb3c1' }, { name:'Slate', accent:'#caf0f8' },
+  { name:'Ember', accent:'#ffca3a' }, { name:'Mint', accent:'#99d8c0' },
+];
+
+function tile(dotClass, extraClass = '', off = null) {
+  const guide = off !== null ? ` guide` : '';
+  const style = off !== null ? ` style="--off:${off}"` : '';
+  const dot = dotClass ? `<span class="dot ${dotClass}"></span>` : '';
+  return `<div class="tile ${extraClass}${guide}"${style}>
+    <div class="label-row"><span class="label">Streak</span>${dot}</div>
+    <div class="value-row"><span class="value">5</span><span class="unit">weeks</span></div>
+  </div>`;
+}
+
+const FILLS = [
+  { cls:'f-accent', name:'1 · Accent gefüllt (aktuell)',
+    note:'Bei Ocean, Slate, Forest und Ember vom hohlen Ring nicht zu unterscheiden.' },
+  { cls:'f-ink', name:'2 · Tinte gefüllt (#1a1a1a)',
+    note:'Dieselbe Tinte wie die gefüllte Heatmap-Zelle und der Done-Button. In jeder Palette eindeutig.' },
+  { cls:'f-ring', name:'3 · Accent mit dunklem Ring',
+    note:'Behält die Tagesfarbe und wird trotzdem eindeutig — aber 1,5 px Ring auf 8 px ist filigran.' },
+  { cls:'f-gone', name:'4 · Ring offen, dann weg',
+    note:'Grauer Ring solange offen, danach nichts. Eindeutig, aber der offene Zustand ist sehr leise.' },
+  { cls:'f-pending', name:'5 · Dein Modell: Akzent-Punkt = noch offen',
+    note:'Punkt als Erinnerung statt als Belohnung. Kein Zwei-Zustands-Kontrastproblem mehr — aber schalte auf Slate oder Ocean: dann ist genau der Zustand blass, der auffallen soll.' },
+  { cls:'f-pending-ink', name:'6 · Dein Modell, aber in Tinte',
+    note:'Wie 5, nur ist die Erinnerung #1a1a1a statt Akzent. In jeder Palette gleich gut sichtbar — kostet dafür den Farbtupfer.' },
+];
+
+document.getElementById('fills').innerHTML = FILLS.map(f => `
+  <div class="variant">
+    <p class="caption">${f.name}</p>
+    <div class="pair">
+      <div>
+        <p class="caption" style="font-weight:600;letter-spacing:.04em">noch nichts</p>
+        ${tile('open', f.cls)}
+      </div>
+      <div>
+        <p class="caption" style="font-weight:600;letter-spacing:.04em">erledigt</p>
+        ${tile('done', f.cls)}
+      </div>
+    </div>
+    <p class="note">${f.note}</p>
+  </div>
+`).join('');
+
+const OFFSETS = [
+  { cls:'o-0',  label:'0 px (aktuell)',  off:'0px' },
+  { cls:'o-05', label:'−0,5 px',         off:'-0.5px' },
+  { cls:'o-1',  label:'−1 px',           off:'-1px' },
+  { cls:'o-15', label:'−1,5 px',         off:'-1.5px' },
+  { cls:'o-2',  label:'−2 px',           off:'-2px' },
+];
+
+document.getElementById('offsets').innerHTML = OFFSETS.map(o => `
+  <div class="variant">
+    <p class="caption">${o.label}</p>
+    <div class="row">${tile('open', o.cls, o.off)}${tile('done f-ink', o.cls + ' f-ink', o.off)}</div>
+  </div>
+`).join('');
+
+// Kontrasttabelle
+const lum = h => { const c=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255)
+  .map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return .2126*c[0]+.7152*c[1]+.0722*c[2]; };
+const ratio = (a,b) => { const l1=Math.max(lum(a),lum(b)), l2=Math.min(lum(a),lum(b)); return (l1+.05)/(l2+.05); };
+const ringR = ratio('#d1d5db','#ffffff');
+document.getElementById('contrast').innerHTML =
+  `<tr><th>Zustand</th><th>Kontrast</th><th>Δ zum Ring</th></tr>
+   <tr><td>hohler Ring #d1d5db</td><td class="num">${ringR.toFixed(2)}:1</td><td>—</td></tr>` +
+  PALETTES.map(p => {
+    const r = ratio(p.accent,'#ffffff'), d = Math.abs(r-ringR);
+    const warn = d < 0.2 ? ' style="color:#dc2626"' : '';
+    return `<tr${warn}><td>gefüllt ${p.name}</td><td class="num">${r.toFixed(2)}:1</td><td class="num">${d.toFixed(2)}</td></tr>`;
+  }).join('') +
+  `<tr style="font-weight:700"><td>gefüllt #1a1a1a</td><td class="num">${ratio('#1a1a1a','#ffffff').toFixed(2)}:1</td><td class="num">${Math.abs(ratio('#1a1a1a','#ffffff')-ringR).toFixed(2)}</td></tr>`;
+
+// Palette-Umschalter
+const palBox = document.getElementById('palettes');
+palBox.innerHTML = PALETTES.map((p,i)=>
+  `<button class="pal${i===0?' active':''}" data-accent="${p.accent}"><i style="background:${p.accent}"></i>${p.name}</button>`
+).join('');
+const apply = hex => document.documentElement.style.setProperty('--accent', hex);
+apply(PALETTES[0].accent);
+palBox.addEventListener('click', e => {
+  const b = e.target.closest('.pal'); if (!b) return;
+  palBox.querySelectorAll('.pal').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); apply(b.dataset.accent);
+});
+</script>
+</body>
+</html>
