@@ -204,7 +204,8 @@ const weightIncreaseCount = computed(
   () => sessionsStore.todaySession?.machinesDone.filter((e) => e.weightIncreased).length ?? 0,
 )
 
-// Exposes the Ref<boolean> itself. Parent must access as cardStackRef.value.isSwiping.value
+// Vue wraps the expose object in proxyRefs, so the parent reads this as a plain
+// boolean: cardStackRef.value.isSwiping — not .isSwiping.value
 defineExpose({ isSwiping })
 </script>
 

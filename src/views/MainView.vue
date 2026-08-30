@@ -15,8 +15,11 @@ const uiStore = useUIStore()
 const palette = useDailyPalette()
 const router = useRouter()
 
-const cardStackRef = ref()
-const isSwiping = computed<boolean>(() => cardStackRef.value?.isSwiping?.value ?? false)
+// Vue unwraps refs on a component's expose proxy, so isSwiping arrives here as a
+// plain boolean — reading .value off it yielded undefined and the guard below was
+// permanently false. Typing the ref keeps that mistake from coming back.
+const cardStackRef = ref<InstanceType<typeof CardStack> | null>(null)
+const isSwiping = computed<boolean>(() => cardStackRef.value?.isSwiping ?? false)
 
 const doneCount = computed(() => sessionsStore.todaySession?.machinesDone.length ?? 0)
 
