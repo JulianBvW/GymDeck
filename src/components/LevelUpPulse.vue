@@ -5,12 +5,10 @@ withDefaults(
     accent: string
     /**
      * Drives the dots. Deliberately NOT the accent: at a few pixels on the #faf9f7
-     * background an accent averages 1.4:1 contrast and vanishes. The palette's deepest
-     * wave colour averages 7.1:1, and it is what the app already uses wherever a
-     * palette colour has to carry a small foreground element (the empty-state icons
-     * and CTA buttons).
+     * background an accent averages 1.4:1 contrast and simply vanishes. wave2 averages
+     * 4.6:1 — visible, but softer than wave1's 7.1:1, which read as too heavy.
      */
-    deep: string
+    particleColor: string
     /** Optional add-on — set false to drop the burst and keep only the glow. */
     particles?: boolean
   }>(),
@@ -60,7 +58,7 @@ const PARTICLES = [
         :style="{
           width: `${p.size}px`,
           height: `${p.size}px`,
-          backgroundColor: deep,
+          backgroundColor: particleColor,
           animationDelay: `${p.delay}ms`,
           '--dx': `${p.dx}px`,
           '--dy': `${p.dy}px`,
