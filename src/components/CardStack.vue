@@ -22,6 +22,10 @@ const returningMachineId = ref<string | null>(null)
 const returningFromLeft = ref(false)
 const promotingMachineId = ref<string | null>(null)
 const promotingInStartPos = ref(false)
+// True only when the last card was cleared during this mount. initCards() never sets it,
+// so arriving at an already-finished session — a reload, or coming back from /stats —
+// shows the completion block without replaying the celebration.
+const justCompleted = ref(false)
 
 const isLastCard = computed(() => remainingMachines.value.length <= 1)
 
@@ -138,6 +142,11 @@ function cardWrapperStyle(index: number, machineId: string) {
 function removeTopCard() {
   isPromoting.value = true
   remainingMachines.value.shift()
+  // Skipping every card also empties the deck, but "0 machines" is not worth a
+  // celebration — require something actually logged.
+  if (remainingMachines.value.length === 0 && doneCount.value > 0) {
+    justCompleted.value = true
+  }
   setTimeout(() => {
     isPromoting.value = false
   }, 350)
@@ -234,17 +243,29 @@ defineExpose({ isSwiping })
       v-else-if="remainingMachines.length === 0"
       class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
     >
-      <div
-        class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center check-pop-in"
-      >
-        <Check :size="28" :style="{ color: palette.accent }" />
+      <div class="relative">
+        <!-- One ring, once — punctuation for the moment the deck runs out -->
+        <div
+          v-if="justCompleted"
+          class="absolute inset-0 rounded-full pointer-events-none ring-pulse"
+          :style="{ '--ring-color': palette.accent }"
+        />
+        <div
+          class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center"
+          :class="{ 'check-pop-in': justCompleted }"
+        >
+          <Check :size="28" :style="{ color: palette.accent }" />
+        </div>
       </div>
-      <h2 class="font-bold text-gray-900 text-xl">Session complete</h2>
-      <p class="text-gray-500 text-sm">
+      <h2 class="font-bold text-gray-900 text-xl" :class="{ 'reveal reveal-1': justCompleted }">
+        Session complete
+      </h2>
+      <p class="text-gray-500 text-sm" :class="{ 'reveal reveal-2': justCompleted }">
         {{ doneCount }} machines · {{ weightIncreaseCount }} weight increases
       </p>
       <button
         class="mt-1 px-5 py-2.5 rounded-2xl text-sm font-semibold bg-gray-900 text-white touch-manipulation"
+        :class="{ 'reveal reveal-3': justCompleted }"
         @click="goToStats"
       >
         See statistics
@@ -288,5 +309,47 @@ defineExpose({ isSwiping })
 }
 .check-pop-in {
   animation: checkPopIn 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Copied from FitnessCard.vue — scoped styles cannot be shared, and the project
+   already duplicates keyframes this way across the two editor components. */
+@keyframes ringPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.ring-pulse {
+  border: 2px solid var(--ring-color, currentColor);
+  animation: ringPulse 500ms ease-out forwards;
+}
+
+/* Staggered reveal. `both` is required: without it each element is visible during
+   its own delay and flashes before animating. */
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal {
+  animation: revealUp 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.reveal-1 {
+  animation-delay: 80ms;
+}
+.reveal-2 {
+  animation-delay: 160ms;
+}
+.reveal-3 {
+  animation-delay: 240ms;
 }
 </style>
