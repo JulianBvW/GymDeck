@@ -2,18 +2,18 @@
 
 Open wishes, roughly in the order they came up. Tick them off as they land.
 
-Unlike the other files in `refs/`, this one is **not** historical — it describes work
-that has not happened yet.
+Unlike the other files in `refs/`, this one is **not** historical — it is the live list.
+Everything on it is currently done; add new wishes here rather than starting a new file.
 
 ---
 
 ## Animations
 
-- [ ] **Session complete.** Something subtle but satisfying when the last machine leaves
+- [x] **Session complete.** Something subtle but satisfying when the last machine leaves
       the deck. Today the completion state just pops a check icon in
       (`CardStack.vue`, `.check-pop-in`) — the waves reaching the top of the screen is
       the real moment and it currently passes without comment.
-- [ ] **Weight increase.** A small reward when "level up" bumps a machine's weight.
+- [x] **Weight increase.** A small reward when "level up" bumps a machine's weight.
       The card is already flying off screen at that point, so the beat probably belongs
       either on the number just before it leaves, or on the next card as it promotes.
 
@@ -22,7 +22,7 @@ fast when it fires several times a session. Transform and opacity only.
 
 ## Training log
 
-- [ ] **A small log at the bottom of StatsView.** A quick table, one row per session:
+- [x] **A small log at the bottom of StatsView.** A quick table, one row per session:
       date · machines done · weight increases.
 
       Everything needed is already in `sessionsStore.sessions` — each `Session` has
@@ -31,7 +31,7 @@ fast when it fires several times a session. Transform and opacity only.
 
 ## Heatmap
 
-- [ ] **Mark weeks with two or more sessions.** A star, a different colour, a dot —
+- [x] **Mark weeks with two or more sessions.** A star, a different colour, a dot —
       undecided, worth trying a few.
 
       Note that `WeekHeatmap.vue` is currently binary: `weekState()` returns
