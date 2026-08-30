@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GymDeck — Heatmap-Ideen für 2× pro Woche</title>
+<style>
+  /* ---------------------------------------------------------------------
+     Alles 1:1 aus der App übernommen:
+       Hintergrund      #faf9f7   (StatsView)
+       Seitenpadding    20px      (px-5)
+       Karte            #fff, border-radius 16px (rounded-2xl), shadow-sm, padding 16px (p-4)
+       Sektionslabel    12px / 600 / tracking .1em / #9ca3af / uppercase
+       Quartalslabel    12px / 600 / #9ca3af / Breite 20px (w-5)
+       Grid             13 Spalten, gap 4px (gap-1)
+       Zelle            aspect-ratio 1, border-radius 2px (rounded-sm)
+       done             #1a1a1a
+       missed           #e0e0e0
+       future           #f5f5f5 + 1px dashed #d1d5db
+
+     Container = 375 × 812 px = iPhone 13 mini (logische CSS-Pixel).
+     Daraus ergibt sich die echte Zellgröße:
+       375 − 2×20 (Seitenrand)      = 335
+       335 − 2×16 (Kartenpadding)   = 303
+       303 − 20 − 8 (Q-Label + gap) = 275
+       275 − 12×4  (Spalten-gaps)   = 227
+       227 ÷ 13                     ≈ 17,5 px pro Zelle
+     --------------------------------------------------------------------- */
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 16px 80px;
+    background: #e6e4e1;              /* nur die Umgebung, nicht die App */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .device-caption {
+    width: 375px; margin: 0 auto 10px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(0,0,0,0.38); text-align: center;
+  }
+
+  /* Der Bildschirm: exakt so breit wie ein iPhone 13 mini. */
+  .phone {
+    width: 375px;
+    margin: 0 auto;
+    background: #faf9f7;
+    border-radius: 44px;              /* Gerätekorpus-Radius */
+    padding: 34px 20px 44px;          /* seitlich = px-5 der App */
+    box-shadow: 0 22px 50px rgba(14,15,20,0.14), 0 3px 10px rgba(14,15,20,0.06);
+    color: #1a1a1a;
+  }
+
+  /* 812 px = Bildschirmhöhe. Nur als Markierung, die Seite darf länger sein. */
+  .fold {
+    position: relative; height: 0;
+    border-top: 1px dashed rgba(14,15,20,0.16);
+    margin: 4px 0 26px;
+  }
+  .fold span {
+    position: absolute; right: 0; top: -8px;
+    background: #faf9f7; padding-left: 6px;
+    font-size: 10px; color: rgba(0,0,0,0.3);
+  }
+
+  h1 { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+
+  .lede { font-size: 12.5px; line-height: 1.55; color: rgba(0,0,0,0.55); margin: 0 0 18px; }
+  .lede code { font-size: 11.5px; background: rgba(14,15,20,0.05); padding: 1px 4px; border-radius: 4px; }
+
+  /* Palette-Umschalter -------------------------------------------------- */
+  .palettes { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 4px; }
+  .pal {
+    border: 0; padding: 6px 9px; border-radius: 10px; cursor: pointer;
+    font-size: 10.5px; font-weight: 600; font-family: inherit;
+    background: rgba(14,15,20,0.05); color: rgba(0,0,0,0.55);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pal.active { background: #1a1a1a; color: #fff; }
+  .pal i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+  /* Variante ------------------------------------------------------------ */
+  .variant { margin-bottom: 32px; }
+  .variant-no {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    color: rgba(0,0,0,0.35); text-transform: uppercase;
+  }
+  .variant-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 4px; }
+  .variant-desc { font-size: 12px; line-height: 1.5; color: rgba(0,0,0,0.55); margin: 0 0 10px; }
+  .variant-note {
+    font-size: 11px; line-height: 1.5; color: rgba(0,0,0,0.42);
+    margin: 8px 0 0; padding-left: 9px; border-left: 2px solid rgba(14,15,20,0.09);
+  }
+
+  /* --- exakt die Struktur aus WeekHeatmap.vue --- */
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+    color: #9ca3af; text-transform: uppercase;
+    margin: 0 0 8px; padding-left: 4px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .qrow { display: flex; align-items: center; gap: 8px; }
+  .qlabel { font-size: 12px; font-weight: 600; color: #9ca3af; width: 20px; flex-shrink: 0; }
+  .grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 4px; flex: 1; }
+
+  .cell { aspect-ratio: 1; border-radius: 2px; position: relative; }
+  .cell.missed { background: #e0e0e0; }
+  .cell.future { background: #f5f5f5; border: 1px dashed #d1d5db; }
+  .cell.one    { background: #1a1a1a; }
+  .cell.two    { background: #1a1a1a; }
+
+  /* Idee 1 — Accent-Punkt ---------------------------------------------- */
+  .v1 .cell.two::after {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Idee 2 — Tonwert-Rampe (kein Accent) -------------------------------- */
+  .v2 .cell.one { background: #9ca3af; }
+  .v2 .cell.two { background: #1a1a1a; }
+
+  /* Idee 3 — Halb / voll gefüllt ---------------------------------------- */
+  .v3 .cell.one { background: linear-gradient(to top, #1a1a1a 50%, #e0e0e0 50%); }
+  .v3 .cell.two { background: #1a1a1a; }
+
+  /* Idee 4 — Accent-Ring ------------------------------------------------ */
+  .v4 .cell.two { box-shadow: 0 0 0 2px var(--accent); }
+
+  /* Idee 5 — Stern ------------------------------------------------------ */
+  .v5 .cell.two::after {
+    content: "★"; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; line-height: 1; color: var(--accent);
+  }
+
+  /* Legende ------------------------------------------------------------- */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding-left: 4px; }
+  .legend div { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: rgba(0,0,0,0.5); }
+  .legend .cell { width: 11px; height: 11px; aspect-ratio: auto; flex-shrink: 0; }
+
+  /* Fazit --------------------------------------------------------------- */
+  .verdict {
+    background: #fff; border-radius: 16px; padding: 16px;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    font-size: 12px; line-height: 1.6; color: rgba(0,0,0,0.62);
+  }
+  .verdict h2 { font-size: 12.5px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px; }
+  .verdict ul { margin: 0; padding-left: 16px; }
+  .verdict li { margin-bottom: 6px; }
+  .verdict strong { color: #1a1a1a; }
+</style>
+</head>
+<body>
+
+<p class="device-caption">iPhone 13 mini · 375 × 812 px</p>
+
+<div class="phone">
+
+  <h1>Heatmap: 2× pro Woche</h1>
+  <p class="lede">
+    Fünf Ideen, wie eine Woche mit zwei Sessions aussehen könnte. Der Container ist exakt
+    so breit wie dein Bildschirm, die Zellen sind also real nur
+    <strong>ca. 17,5&nbsp;px</strong> groß — und genau daran scheitern die feineren Ideen.
+    Farben, Radien und Abstände kommen 1:1 aus <code>WeekHeatmap.vue</code> und
+    <code>StatsView.vue</code>.
+  </p>
+
+  <div class="palettes" id="palettes"></div>
+
+  <div class="fold"><span>812 px — hier endet der Bildschirm</span></div>
+
+  <div id="variants"></div>
+
+  <div class="verdict">
+    <h2>Was mir beim Bauen aufgefallen ist</h2>
+    <ul>
+      <li><strong>1 — Punkt:</strong> Bei 17,5&nbsp;px klar erkennbar, und es ist exakt
+        dieselbe Bildsprache wie der Streak-Punkt, den wir gerade in die Stats gebaut
+        haben. 1×-Wochen bleiben unverändert.</li>
+      <li><strong>2 — Tonwert:</strong> Braucht gar keine Accent-Farbe, sieht also in
+        allen acht Paletten identisch aus. Aber Grau für 1× wirkt wie „halb vergessen“
+        statt wie ein Erfolg.</li>
+      <li><strong>3 — Halb/voll:</strong> Selbsterklärend, weil 2 dein Maximum ist — die
+        Zelle wird zur kleinen Fortschrittsanzeige. Kein neues Element, keine Farbe.
+        Kehrseite: 1× sieht dadurch schwächer aus als heute.</li>
+      <li><strong>4 — Ring:</strong> Der Ring frisst den 4&nbsp;px-Abstand zur Nachbarzelle.
+        Schau dir Q4 an — da liegen zwei 2×-Wochen nebeneinander und kleben optisch
+        zusammen.</li>
+      <li><strong>5 — Stern:</strong> Am belohnendsten, aber bei dieser Zellgröße auch am
+        fragilsten — und in den hellen Paletten (Ocean, Slate) verschwindet er fast im
+        Schwarz. Unbedingt auf dem echten Gerät prüfen.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// --- Paletten aus src/assets/palettes.ts -------------------------------------
+const PALETTES = [
+  { name: 'Ocean',    accent: '#ade8f4' },
+  { name: 'Sunset',   accent: '#ffd6a5' },
+  { name: 'Forest',   accent: '#b7e4c7' },
+  { name: 'Lavender', accent: '#e0aaff' },
+  { name: 'Rose',     accent: '#ffb3c1' },
+  { name: 'Slate',    accent: '#caf0f8' },
+  { name: 'Ember',    accent: '#ffca3a' },
+  { name: 'Mint',     accent: '#99d8c0' },
+];
+
+// --- Beispieldaten: 52 Wochen, Werte 0 / 1 / 2 -------------------------------
+// Fester Verlauf, damit alle fünf Varianten exakt dieselben Daten zeigen:
+// Start im Februar, überwiegend 1×, gelegentlich 2×, ein paar Lücken.
+// In Q4 stehen bewusst zwei 2×-Wochen nebeneinander (Index 40/41), um zu sehen,
+// wie sich Ring und Stern bei direkter Nachbarschaft verhalten.
+const WEEKS = [
+  0,0,0,0,0, 1,1,0,1,2, 1,1,2,1,1, 0,1,2,2,1,
+  1,0,1,1,2, 1,1,1,0,1, 2,1,1,2,1, 1,0,0,1,1,
+  2,2,1,1,0, 1,2,1,1,1, 1,2
+];
+
+// Aktuelle Woche — wie weeksOfYear(): Montag der Woche, die den 1. Januar enthält.
+function currentWeekIndex() {
+  const now = new Date();
+  const jan1 = new Date(now.getFullYear(), 0, 1);
+  const day = jan1.getDay();
+  const start = new Date(now.getFullYear(), 0, 1 - (day === 0 ? 6 : day - 1));
+  return Math.floor((now - start) / (7 * 24 * 60 * 60 * 1000));
+}
+
+const IDEAS = [
+  {
+    cls: 'v1', name: 'Accent-Punkt',
+    desc: 'Die Zelle bleibt schwarz und bekommt einen kleinen Punkt in der Tagesfarbe.',
+    note: 'Gleiche Bildsprache wie der neue Streak-Punkt in den Stats — der ist gefüllt, sobald die Woche sitzt.'
+  },
+  {
+    cls: 'v2', name: 'Tonwert-Rampe',
+    desc: '1× wird grau, 2× bleibt schwarz. Rein monochrom, wie bei GitHub.',
+    note: 'Einzige Idee ganz ohne Accent-Farbe — unabhängig davon, welche Palette der Tag auswürfelt.'
+  },
+  {
+    cls: 'v3', name: 'Halb / voll gefüllt',
+    desc: '1× füllt die Zelle zur Hälfte, 2× ganz. Die Zelle wird zur Fortschrittsanzeige.',
+    note: 'Funktioniert nur, weil 2 dein Maximum ist — bei 3× bräuchte es Drittel, und die sind bei 17 px tot.'
+  },
+  {
+    cls: 'v4', name: 'Accent-Ring',
+    desc: 'Schwarze Zelle mit einem Ring in der Tagesfarbe außen herum.',
+    note: 'Achte auf Q4: zwei 2×-Wochen direkt nebeneinander — der Ring nimmt sich den Abstand dazwischen.'
+  },
+  {
+    cls: 'v5', name: 'Stern',
+    desc: 'Ein kleiner Stern in der Tagesfarbe mitten in der schwarzen Zelle.',
+    note: 'Am belohnendsten — aber bei dieser Zellgröße auch am fragilsten.'
+  },
+];
+
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
+const cur = currentWeekIndex();
+
+function cellClass(i) {
+  if (i > cur) return 'future';
+  const v = WEEKS[i] ?? 0;
+  return v >= 2 ? 'two' : v === 1 ? 'one' : 'missed';
+}
+
+function heatmap(cls) {
+  let rows = '';
+  for (let q = 0; q < 4; q++) {
+    let cells = '';
+    for (let i = q * 13; i < q * 13 + 13; i++) {
+      cells += `<div class="cell ${cellClass(i)}"></div>`;
+    }
+    rows += `<div class="qrow"><span class="qlabel">${QUARTERS[q]}</span><div class="grid">${cells}</div></div>`;
+  }
+  return `<div class="${cls}">
+    <p class="section-label">Sessions this year</p>
+    <div class="card">${rows}</div>
+    <div class="legend ${cls}">
+      <div><span class="cell missed"></span> keine</div>
+      <div><span class="cell one"></span> 1×</div>
+      <div><span class="cell two"></span> 2×</div>
+      <div><span class="cell future"></span> kommt noch</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('variants').innerHTML = IDEAS.map((idea, n) => `
+  <div class="variant">
+    <span class="variant-no">Idee ${n + 1}</span>
+    <div class="variant-name">${idea.name}</div>
+    <p class="variant-desc">${idea.desc}</p>
+    ${heatmap(idea.cls)}
+    <p class="variant-note">${idea.note}</p>
+  </div>
+`).join('');
+
+// Palette-Umschalter — die App würfelt sie täglich neu, also lohnt der Blick auf mehrere.
+const palBox = document.getElementById('palettes');
+palBox.innerHTML = PALETTES.map((p, i) =>
+  `<button class="pal${i === 0 ? ' active' : ''}" data-accent="${p.accent}">
+     <i style="background:${p.accent}"></i>${p.name}
+   </button>`
+).join('');
+
+const applyAccent = hex => document.documentElement.style.setProperty('--accent', hex);
+applyAccent(PALETTES[0].accent);
+
+palBox.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pal');
+  if (!btn) return;
+  palBox.querySelectorAll('.pal').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyAccent(btn.dataset.accent);
+});
+</script>
+</body>
+</html>
