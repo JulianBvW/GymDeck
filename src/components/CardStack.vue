@@ -9,6 +9,13 @@ import { useUIStore } from '@/stores/ui'
 import { useDailyPalette } from '@/composables/useDailyPalette'
 import type { Machine } from '@/stores/machines'
 
+// The level-up pulse needs the full screen width at the top edge. This component's root
+// is card-sized and carries z-0, which makes it its own stacking context, so the pulse
+// cannot live here — MainView renders it and listens for this.
+const emit = defineEmits<{
+  weightUp: []
+}>()
+
 const router = useRouter()
 const machinesStore = useMachinesStore()
 const sessionsStore = useSessionsStore()
@@ -169,6 +176,7 @@ function onWeightUp() {
   const weight = machine.currentWeight
   sessionsStore.logEntry({ machineId: machine.id, weight, weightIncreased: true })
   machinesStore.updateMachine(machine.id, { currentWeight: weight + machine.stepSize })
+  emit('weightUp')
   removeTopCard()
 }
 

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Activity, Settings } from 'lucide-vue-next'
 import CardStack from '@/components/CardStack.vue'
 import WaveBackground from '@/components/WaveBackground.vue'
+import LevelUpPulse from '@/components/LevelUpPulse.vue'
 import { useMachinesStore } from '@/stores/machines'
 import { useSessionsStore } from '@/stores/sessions'
 import { useUIStore } from '@/stores/ui'
@@ -46,6 +47,15 @@ function goToSettings() {
   router.push('/settings')
 }
 
+// Bumping the key remounts the pulse, which restarts its CSS animation — the same
+// trick FitnessCard uses for its ring. MachineCard emits weightUp 300ms after the card
+// starts flying, and .swipe-up eases in, so the card leaves the top edge just as this
+// fires.
+const pulseKey = ref(0)
+function onWeightUp() {
+  pulseKey.value++
+}
+
 function onBottomZoneTap() {
   if (isSwiping.value) return
   uiStore.transitionDirection = 'up'
@@ -86,9 +96,17 @@ function onBottomZoneTap() {
       </div>
     </div>
 
+    <!-- Level-up pulse from the top edge -->
+    <LevelUpPulse
+      v-if="pulseKey > 0"
+      :key="pulseKey"
+      :accent="palette.accent"
+      :particles="true"
+    />
+
     <!-- Card stack -->
     <div class="relative z-10 h-full flex items-center justify-center">
-      <CardStack ref="cardStackRef" />
+      <CardStack ref="cardStackRef" @weight-up="onWeightUp" />
     </div>
 
     <!-- Bottom touch zone → Stats -->
