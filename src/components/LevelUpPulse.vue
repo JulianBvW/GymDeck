@@ -10,17 +10,23 @@ withDefaults(
 
 // Fixed offsets rather than random ones: the burst has to look the same every time
 // so it can be tuned. The origin sits on the top edge, so every dot fans downward.
+//
+// Travel distance is not cosmetic. The glow is fully opaque accent for the first 35%
+// of its radius — about 99px on a 13 mini — and only fades out past ~205px. Dots that
+// stop short of that are the same colour on the same colour and simply cannot be seen.
+// So every dy clears the opaque core, and dx stays inside ±160 to avoid being clipped
+// by MainView's overflow-hidden.
 const PARTICLES = [
-  { dx: -104, dy: 34, size: 3, delay: 0 },
-  { dx: -78, dy: 66, size: 4, delay: 20 },
-  { dx: -52, dy: 22, size: 3, delay: 45 },
-  { dx: -28, dy: 78, size: 3, delay: 10 },
-  { dx: -10, dy: 48, size: 4, delay: 55 },
-  { dx: 14, dy: 84, size: 3, delay: 30 },
-  { dx: 38, dy: 30, size: 4, delay: 0 },
-  { dx: 62, dy: 62, size: 3, delay: 48 },
-  { dx: 88, dy: 26, size: 3, delay: 18 },
-  { dx: 112, dy: 54, size: 3, delay: 38 },
+  { dx: -152, dy: 168, size: 5, delay: 0 },
+  { dx: -118, dy: 244, size: 4, delay: 40 },
+  { dx: -86, dy: 132, size: 6, delay: 15 },
+  { dx: -54, dy: 262, size: 4, delay: 60 },
+  { dx: -22, dy: 196, size: 5, delay: 25 },
+  { dx: 26, dy: 270, size: 5, delay: 50 },
+  { dx: 58, dy: 146, size: 6, delay: 8 },
+  { dx: 94, dy: 228, size: 4, delay: 35 },
+  { dx: 126, dy: 158, size: 5, delay: 55 },
+  { dx: 154, dy: 208, size: 4, delay: 20 },
 ]
 </script>
 
@@ -79,15 +85,17 @@ const PARTICLES = [
   animation: glowPulse 1000ms ease-out forwards;
 }
 
-/* Thrown out from the origin, then pulled straight back in. */
+/* Thrown out from the origin, then pulled straight back in. `both` keeps each dot
+   hidden during its stagger delay — with `forwards` alone it sits visible at the
+   origin until its turn. */
 @keyframes particleBurst {
   0% {
-    transform: translate(0, 0) scale(0.4);
+    transform: translate(0, 0) scale(0.3);
     opacity: 0;
   }
-  30% {
+  35% {
     transform: translate(var(--dx), var(--dy)) scale(1);
-    opacity: 0.9;
+    opacity: 1;
   }
   100% {
     transform: translate(0, 0) scale(0.3);
@@ -99,6 +107,6 @@ const PARTICLES = [
   top: 0;
   left: 50%;
   border-radius: 50%;
-  animation: particleBurst 620ms ease-out forwards;
+  animation: particleBurst 900ms ease-out both;
 }
 </style>
