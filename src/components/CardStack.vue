@@ -13,7 +13,7 @@ import type { Machine } from '@/stores/machines'
 // is card-sized and carries z-0, which makes it its own stacking context, so the pulse
 // cannot live here — MainView renders it and listens for this.
 const emit = defineEmits<{
-  weightUp: []
+  weightUpStart: []
 }>()
 
 const router = useRouter()
@@ -176,7 +176,6 @@ function onWeightUp() {
   const weight = machine.currentWeight
   sessionsStore.logEntry({ machineId: machine.id, weight, weightIncreased: true })
   machinesStore.updateMachine(machine.id, { currentWeight: weight + machine.stepSize })
-  emit('weightUp')
   removeTopCard()
 }
 
@@ -294,6 +293,7 @@ defineExpose({ isSwiping })
           :disable-later="isLastCard"
           @done="onDone"
           @weight-up="onWeightUp"
+          @weight-up-start="emit('weightUpStart')"
           @later="onLater"
           @skip="onSkip"
           @swipe-start="isSwiping = true"

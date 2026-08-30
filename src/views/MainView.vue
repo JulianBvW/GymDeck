@@ -48,11 +48,10 @@ function goToSettings() {
 }
 
 // Bumping the key remounts the pulse, which restarts its CSS animation — the same
-// trick FitnessCard uses for its ring. MachineCard emits weightUp 300ms after the card
-// starts flying, and .swipe-up eases in, so the card leaves the top edge just as this
-// fires.
+// trick FitnessCard uses for its ring. Driven by weightUpStart, which fires the moment
+// the button is pressed, so the glow rises with the card rather than after it.
 const pulseKey = ref(0)
-function onWeightUp() {
+function onWeightUpStart() {
   pulseKey.value++
 }
 
@@ -106,7 +105,7 @@ function onBottomZoneTap() {
 
     <!-- Card stack -->
     <div class="relative z-10 h-full flex items-center justify-center">
-      <CardStack ref="cardStackRef" @weight-up="onWeightUp" />
+      <CardStack ref="cardStackRef" @weight-up-start="onWeightUpStart" />
     </div>
 
     <!-- Bottom touch zone → Stats -->

@@ -14,6 +14,8 @@ const emit = defineEmits<{
   done: []
   later: []
   weightUp: []
+  /** Fires the instant the card starts flying up, unlike weightUp which waits 300ms. */
+  weightUpStart: []
   skip: []
   'swipe-start': []
   'swipe-end': []
@@ -74,6 +76,9 @@ function triggerSwipeOut(direction: 'left' | 'right' | 'up') {
   isDragging.value = false
   isSnapping.value = false
   swipeDirection.value = direction
+  // Synchronous, so the pulse can start with the flight rather than after it. The
+  // existing 300ms chain below is untouched.
+  if (direction === 'up') emit('weightUpStart')
   setTimeout(() => {
     swipeDirection.value = null
     dragX.value = 0

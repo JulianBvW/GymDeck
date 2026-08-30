@@ -33,7 +33,7 @@ const PARTICLES = [
     <div
       class="glow"
       :style="{
-        background: `radial-gradient(ellipse 65% 100% at 50% 0%, ${accent} 0%, ${accent} 35%, transparent 72%)`,
+        background: `radial-gradient(ellipse 100% 100% at 50% 0%, ${accent} 0%, ${accent} 35%, transparent 72%)`,
       }"
     />
 
@@ -56,12 +56,14 @@ const PARTICLES = [
 </template>
 
 <style scoped>
+/* Starts with the button press and outlasts the card's 300ms flight, so the glow is
+   still there when the card clears the top edge. */
 @keyframes glowPulse {
   0% {
     opacity: 0;
     transform: scaleY(0.9);
   }
-  18% {
+  14% {
     opacity: 1;
     transform: scaleY(1);
   }
@@ -74,7 +76,7 @@ const PARTICLES = [
   position: absolute;
   inset: 0;
   transform-origin: top center;
-  animation: glowPulse 650ms ease-out forwards;
+  animation: glowPulse 1000ms ease-out forwards;
 }
 
 /* Thrown out from the origin, then pulled straight back in. */
