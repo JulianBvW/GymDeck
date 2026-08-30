@@ -17,7 +17,7 @@
 
 - Strict mode is on. Never use `any`. Use type guards (`(x): x is T`) for array filters.
 - Array access (`arr[i]`) returns `T | undefined` in strict mode — use non-null assertion (`arr[i]!`) only when the index is provably in range, otherwise guard.
-- Run type checks with: `./node_modules/.bin/vue-tsc --noEmit` — never append `2>&1`, it breaks the permission pattern match.
+- Run type checks with: `./node_modules/.bin/vue-tsc --build` — never append `2>&1`, it breaks the permission pattern match. **Not `--noEmit`:** `tsconfig.json` is solution-style (`"files": []` plus references), so `--noEmit` checks zero files and always exits 0. Add `--force` to re-check everything rather than only what changed.
 
 ## Tailwind / CSS
 

@@ -79,8 +79,11 @@ npm run format       # prettier over src/
 For a type check without the full build:
 
 ```sh
-./node_modules/.bin/vue-tsc --noEmit
+./node_modules/.bin/vue-tsc --build         # add --force to re-check everything
 ```
+
+Not `--noEmit` — `tsconfig.json` is solution-style (`"files": []` plus project
+references), so `--noEmit` type-checks nothing and exits 0 regardless.
 
 ---
 
