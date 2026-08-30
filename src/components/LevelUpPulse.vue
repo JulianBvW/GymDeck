@@ -1,7 +1,16 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
+    /** Drives the glow. Palette accents are pastels, which is right for a large wash. */
     accent: string
+    /**
+     * Drives the dots. Deliberately NOT the accent: at a few pixels on the #faf9f7
+     * background an accent averages 1.4:1 contrast and vanishes. The palette's deepest
+     * wave colour averages 7.1:1, and it is what the app already uses wherever a
+     * palette colour has to carry a small foreground element (the empty-state icons
+     * and CTA buttons).
+     */
+    deep: string
     /** Optional add-on — set false to drop the burst and keep only the glow. */
     particles?: boolean
   }>(),
@@ -51,7 +60,7 @@ const PARTICLES = [
         :style="{
           width: `${p.size}px`,
           height: `${p.size}px`,
-          backgroundColor: accent,
+          backgroundColor: deep,
           animationDelay: `${p.delay}ms`,
           '--dx': `${p.dx}px`,
           '--dy': `${p.dy}px`,

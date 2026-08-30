@@ -100,6 +100,7 @@ function onBottomZoneTap() {
       v-if="pulseKey > 0"
       :key="pulseKey"
       :accent="palette.accent"
+      :deep="palette.wave1"
       :particles="true"
     />
 
